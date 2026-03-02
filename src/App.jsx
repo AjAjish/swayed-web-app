@@ -1,7 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-
-// ── Tailwind CDN is loaded externally ──────────────────────────────────────
-// Google Fonts: Playfair Display + DM Sans
+import { useEffect, useRef, useState } from "react";
+import * as THREE from "three";
 
 const menuData = {
   "Milk Chai's": [
@@ -18,7 +16,7 @@ const menuData = {
     { name: "Lemon Chia Chai", price: null, desc: "Zesty tangy lemon with chia seeds in a revitalizing, refreshing brew." },
     { name: "Lemon Ginger Chai", price: null, desc: "Vibrant lemon and spicy ginger — energizing and aromatic in every sip." },
   ],
-  "Coffee": [
+  Coffee: [
     { name: "Filter Coffee", price: null, desc: "Traditional Chennai Filter Coffee — rich, aromatic, authentic." },
     { name: "Black Coffee", price: null, desc: "Pure, robust flavour crafted to perfection for a bold experience." },
     { name: "Chukku Kaapi with Milk", price: null, desc: "Freshly brewed coffee and warming spices for a comforting revitalising sip." },
@@ -46,7 +44,7 @@ const menuData = {
     { name: "Veg Puff", price: null, desc: "Flaky pastry filled with a savory blend of fresh vegetables and aromatic spices." },
     { name: "Paneer Puff", price: null, desc: "Flaky pastry filled with flavorful, spiced paneer — satisfying and savory." },
   ],
-  "Maggi": [
+  Maggi: [
     { name: "Classic Maggi", price: null, desc: "Comforting instant noodles with rich, savory seasoning for a quick satisfying meal." },
     { name: "Chilli Cheese Maggi", price: null, desc: "Fiery noodles topped with melted cheese — bold, spicy comfort food." },
   ],
@@ -58,710 +56,1583 @@ const menuData = {
     { name: "Fine Rusk (6 nos)", price: null, desc: "Golden, light and airy rusk — the ideal companion for chai or coffee." },
     { name: "Tea Cake", price: null, desc: "Moist, tender cake with rich buttery flavour — perfect with chai." },
   ],
-  "Momos": [
+  Momos: [
     { name: "Veg Momo (6 nos)", price: null, desc: "Tender steamed dumplings filled with savory fresh vegetables and aromatic spices." },
     { name: "Corn Cheese Momo (6 nos)", price: null, desc: "Creamy sweet corn and melted cheese — indulgent steamed dumplings." },
     { name: "Paneer Momo (6 nos)", price: null, desc: "Delicately steamed dumplings filled with spiced, creamy paneer." },
   ],
 };
 
-const categoryIcons = {
-  "Milk Chai's": "🍵",
-  "Black Tea / Chai": "🫖",
-  "Coffee": "☕",
-  "Cold Drinks": "🧊",
-  "Hot Drinks": "🌡️",
-  "Buns & Pastries": "🥐",
-  "Savoury Snacks": "🥟",
-  "Maggi": "🍜",
-  "Biscuits & Rusks": "🍪",
-  "Momos": "🥢",
-};
+const galleryImages = [
+  { src: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=900&q=80", label: "Fresh Brew" },
+  { src: "https://images.unsplash.com/photo-1556909114-44e3e70034e2?w=900&q=80", label: "Masala Chai" },
+  { src: "https://images.unsplash.com/photo-1561047029-3000c68339ca?w=900&q=80", label: "Morning Pastries" },
+  { src: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=80", label: "Cozy Corners" },
+  { src: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=900&q=80", label: "Latte Art" },
+  { src: "https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=900&q=80", label: "Cafe Vibes" },
+];
 
-// ── Particle Background ───────────────────────────────────────────────────
-function Particles() {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {[...Array(18)].map((_, i) => (
-        <div
-          key={i}
-          style={{
-            position: "absolute",
-            width: `${Math.random() * 6 + 2}px`,
-            height: `${Math.random() * 6 + 2}px`,
-            borderRadius: "50%",
-            background: `rgba(180,120,60,${Math.random() * 0.25 + 0.05})`,
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            animation: `floatUp ${Math.random() * 8 + 6}s ease-in-out infinite`,
-            animationDelay: `${Math.random() * 6}s`,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
+const heroShots = [
+  "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=420&q=80",
+  "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=420&q=80",
+  "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=420&q=80",
+];
 
-// ── Nav ───────────────────────────────────────────────────────────────────
-function Nav({ activeSection }) {
-  const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+function ThreeCoffeeMotion() {
+  const mountRef = useRef(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
+    if (!mountRef.current) return undefined;
+
+    const container = mountRef.current;
+    const scene = new THREE.Scene();
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    container.appendChild(renderer.domElement);
+
+    const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+    camera.position.set(0, 0, 15);
+
+    const ambientLight = new THREE.AmbientLight(0xffe4c8, 0.75);
+    scene.add(ambientLight);
+
+    const warmLight = new THREE.PointLight(0xffb163, 1.1, 36);
+    warmLight.position.set(4, 5, 9);
+    scene.add(warmLight);
+
+    const coolLight = new THREE.PointLight(0xc4d8ff, 0.5, 30);
+    coolLight.position.set(-5, -3, 7);
+    scene.add(coolLight);
+
+    const beanMaterial = new THREE.MeshStandardMaterial({
+      color: 0x6c3c1f,
+      metalness: 0.2,
+      roughness: 0.5,
+    });
+    const beanGeometry = new THREE.SphereGeometry(0.16, 16, 16);
+    const beansGroup = new THREE.Group();
+    const beans = [];
+
+    for (let index = 0; index < 42; index += 1) {
+      const mesh = new THREE.Mesh(beanGeometry, beanMaterial);
+      const radius = 2.1 + Math.random() * 3.8;
+      const angle = Math.random() * Math.PI * 2;
+      const y = (Math.random() - 0.5) * 4.8;
+      mesh.position.set(
+        Math.cos(angle) * radius,
+        y,
+        Math.sin(angle) * radius * 0.55,
+      );
+      mesh.scale.setScalar(0.8 + Math.random() * 0.9);
+      mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+      mesh.userData = {
+        speed: 0.2 + Math.random() * 0.55,
+        phase: Math.random() * Math.PI * 2,
+      };
+      beans.push(mesh);
+      beansGroup.add(mesh);
+    }
+    scene.add(beansGroup);
+
+    const steamGeometry = new THREE.BufferGeometry();
+    const steamCount = 160;
+    const steamPositions = new Float32Array(steamCount * 3);
+    for (let index = 0; index < steamCount; index += 1) {
+      const i3 = index * 3;
+      steamPositions[i3] = (Math.random() - 0.5) * 7;
+      steamPositions[i3 + 1] = Math.random() * 6 - 2.5;
+      steamPositions[i3 + 2] = (Math.random() - 0.5) * 4;
+    }
+    steamGeometry.setAttribute("position", new THREE.BufferAttribute(steamPositions, 3));
+
+    const steamMaterial = new THREE.PointsMaterial({
+      color: 0xf3d8bc,
+      size: 0.08,
+      transparent: true,
+      opacity: 0.46,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
+
+    const steam = new THREE.Points(steamGeometry, steamMaterial);
+    steam.position.y = -1.8;
+    scene.add(steam);
+
+    const clock = new THREE.Clock();
+    let frameId;
+
+    const onResize = () => {
+      const width = container.clientWidth || 1;
+      const height = container.clientHeight || 1;
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height, false);
+    };
+
+    onResize();
+    window.addEventListener("resize", onResize);
+
+    const animate = () => {
+      const elapsed = clock.getElapsedTime();
+
+      beansGroup.rotation.y = elapsed * 0.11;
+      beansGroup.rotation.x = Math.sin(elapsed * 0.2) * 0.08;
+
+      beans.forEach((bean, index) => {
+        const { speed, phase } = bean.userData;
+        bean.position.y += Math.sin(elapsed * speed + phase + index * 0.1) * 0.0026;
+        bean.rotation.x += 0.01;
+        bean.rotation.y += 0.006;
+      });
+
+      const positionAttr = steamGeometry.getAttribute("position");
+      for (let index = 0; index < steamCount; index += 1) {
+        const i3 = index * 3;
+        let x = positionAttr.array[i3];
+        let y = positionAttr.array[i3 + 1];
+        x += Math.sin(elapsed * 0.4 + index * 0.13) * 0.0019;
+        y += 0.008 + Math.sin(elapsed + index) * 0.001;
+        if (y > 3.7) {
+          y = -2.5;
+          x = (Math.random() - 0.5) * 7;
+        }
+        positionAttr.array[i3] = x;
+        positionAttr.array[i3 + 1] = y;
+      }
+      positionAttr.needsUpdate = true;
+
+      steam.rotation.y = elapsed * 0.08;
+      renderer.render(scene, camera);
+      frameId = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      window.removeEventListener("resize", onResize);
+      if (container.contains(renderer.domElement)) {
+        container.removeChild(renderer.domElement);
+      }
+      beanGeometry.dispose();
+      beanMaterial.dispose();
+      steamGeometry.dispose();
+      steamMaterial.dispose();
+      renderer.dispose();
+    };
+  }, []);
+
+  return <div className="three-motion" ref={mountRef} aria-hidden="true" />;
+}
+
+function Nav({ theme, toggleTheme }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const links = ["Home", "About", "Menu", "Gallery", "Contact"];
+  const links = [
+    ["Home", "home"],
+    ["About", "about"],
+    ["Menu", "menu"],
+    ["Gallery", "gallery"],
+    ["Contact", "contact"],
+  ];
 
   return (
-    <nav
-      style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-        background: scrolled ? "rgba(252,248,244,0.96)" : "transparent",
-        backdropFilter: scrolled ? "blur(12px)" : "none",
-        boxShadow: scrolled ? "0 2px 24px rgba(120,60,20,0.08)" : "none",
-        transition: "all 0.4s ease",
-        borderBottom: scrolled ? "1px solid rgba(180,120,60,0.15)" : "none",
-      }}
-    >
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 72 }}>
-        {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 38, height: 38, borderRadius: "50%", background: "linear-gradient(135deg,#b5651d,#8b4513)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>☕</div>
+    <header className={`nav-shell ${scrolled ? "is-scrolled" : ""}`}>
+      <nav className="container nav-row">
+        <a href="#home" className="brand">
+          <img src="/logo.jpeg" alt="Swayed Over Coffee" className="brand-logo" />
           <div>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 17, color: "#4a2c0a", letterSpacing: 0.5, lineHeight: 1 }}>Swayed Over</div>
-            <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "#b5651d", letterSpacing: 3, textTransform: "uppercase" }}>Coffee</div>
+            <div className="brand-title">Swayed Over</div>
+            <div className="brand-subtitle">Coffee</div>
           </div>
-        </div>
+        </a>
 
-        {/* Desktop links */}
-        <div style={{ display: "flex", gap: 32, alignItems: "center" }} className="desktop-nav">
-          {links.map(link => (
-            <a
-              key={link}
-              href={`#${link.toLowerCase()}`}
-              style={{
-                fontFamily: "'DM Sans', sans-serif", fontSize: 13.5, fontWeight: 500, letterSpacing: 1,
-                textTransform: "uppercase", color: "#4a2c0a", textDecoration: "none",
-                transition: "color 0.2s", opacity: 0.8,
-              }}
-              onMouseEnter={e => { e.target.style.color = "#b5651d"; e.target.style.opacity = 1; }}
-              onMouseLeave={e => { e.target.style.color = "#4a2c0a"; e.target.style.opacity = 0.8; }}
-            >
-              {link}
+        <div className="nav-links desktop-only">
+          {links.map(([label, id]) => (
+            <a key={id} href={`#${id}`} className="nav-link">
+              <span>{label}</span>
             </a>
           ))}
-          <a
-            href="https://wa.me/919003019030"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              background: "#b5651d", color: "#fff", padding: "9px 20px", borderRadius: 50,
-              fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600,
-              letterSpacing: 1, textTransform: "uppercase", textDecoration: "none",
-              transition: "background 0.2s, transform 0.2s",
-              boxShadow: "0 4px 16px rgba(181,101,29,0.3)",
-            }}
-            onMouseEnter={e => { e.target.style.background = "#8b4513"; e.target.style.transform = "translateY(-2px)"; }}
-            onMouseLeave={e => { e.target.style.background = "#b5651d"; e.target.style.transform = "translateY(0)"; }}
-          >
+        </div>
+
+        <div className="nav-cta desktop-only">
+          <button type="button" className="theme-btn" onClick={toggleTheme}>
+            {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
+          </button>
+          <a href="https://wa.me/919003019030" target="_blank" rel="noopener noreferrer" className="solid-btn">
             Order Now
           </a>
         </div>
 
-        {/* Hamburger */}
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="mobile-hamburger"
-          style={{ background: "none", border: "none", cursor: "pointer", fontSize: 22, color: "#4a2c0a" }}
-        >
-          {menuOpen ? "✕" : "☰"}
-        </button>
-      </div>
+        <div className="mobile-actions mobile-only">
+          <button type="button" className="theme-btn mobile-theme-btn" onClick={toggleTheme}>
+            {theme === "dark" ? "☀️" : "🌙"}
+          </button>
+          <button type="button" className="menu-toggle" onClick={() => setMenuOpen((value) => !value)}>
+            {menuOpen ? "✕" : "☰"}
+          </button>
+        </div>
+      </nav>
 
-      {/* Mobile menu */}
       {menuOpen && (
-        <div style={{ background: "rgba(252,248,244,0.98)", padding: "12px 24px 20px", borderTop: "1px solid rgba(180,120,60,0.15)" }}>
-          {links.map(link => (
+        <div className="mobile-menu">
+          <div className="container mobile-menu-inner mobile-menu-card">
+            {links.map(([label, id]) => (
+              <a key={id} className="mobile-link" href={`#${id}`} onClick={() => setMenuOpen(false)}>{label}</a>
+            ))}
             <a
-              key={link}
-              href={`#${link.toLowerCase()}`}
-              onClick={() => setMenuOpen(false)}
-              style={{ display: "block", padding: "10px 0", fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#4a2c0a", textDecoration: "none", borderBottom: "1px solid rgba(180,120,60,0.1)" }}
+              href="https://wa.me/919003019030"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="solid-btn mobile-order"
             >
-              {link}
+              Order Now
             </a>
-          ))}
+          </div>
         </div>
       )}
-    </nav>
+    </header>
   );
 }
 
-// ── Hero ──────────────────────────────────────────────────────────────────
 function Hero() {
   return (
-    <section
-      id="home"
-      style={{
-        minHeight: "100vh",
-        background: "linear-gradient(160deg, #2c1a0e 0%, #4a2c0a 40%, #7a4520 70%, #b5651d 100%)",
-        position: "relative",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        overflow: "hidden",
-      }}
-    >
-      {/* Decorative circles */}
-      <div style={{ position: "absolute", width: 600, height: 600, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.05)", top: "50%", left: "50%", transform: "translate(-50%,-50%)" }} />
-      <div style={{ position: "absolute", width: 900, height: 900, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.03)", top: "50%", left: "50%", transform: "translate(-50%,-50%)" }} />
-      <div style={{ position: "absolute", inset: 0, background: "url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1600&q=80') center/cover", opacity: 0.12 }} />
-
-      <Particles />
-
-      <div style={{ textAlign: "center", padding: "0 24px", position: "relative", zIndex: 2 }}>
-        {/* Badge */}
-        <div style={{ display: "inline-block", background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 50, padding: "6px 18px", marginBottom: 28 }}>
-          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#f5c842" }}>
-            ✦ Purasaiwakkam, Chennai ✦
-          </span>
-        </div>
-
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(44px, 8vw, 88px)", color: "#fff", lineHeight: 1.1, marginBottom: 24, fontWeight: 700 }}>
-          Breakfast Café<br />
-          <span style={{ color: "#f5c842", fontStyle: "italic" }}>Freshly Brewed</span>
-        </h1>
-
-        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "clamp(15px,2vw,18px)", color: "rgba(255,255,255,0.75)", maxWidth: 520, margin: "0 auto 40px", lineHeight: 1.8 }}>
-          Start your day with freshly brewed coffee, homemade pastries & a warm cup of milk chai at <strong style={{ color: "#f5c842" }}>swayedovercoffee</strong>.
-        </p>
-
-        <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
-          <a
-            href="#menu"
-            style={{
-              background: "#f5c842", color: "#2c1a0e", padding: "14px 36px", borderRadius: 50,
-              fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: 1.5,
-              textTransform: "uppercase", textDecoration: "none",
-              boxShadow: "0 8px 32px rgba(245,200,66,0.4)", transition: "transform 0.2s",
-            }}
-            onMouseEnter={e => e.target.style.transform = "translateY(-3px)"}
-            onMouseLeave={e => e.target.style.transform = "translateY(0)"}
-          >
-            View Menu
-          </a>
-          <a
-            href="https://wa.me/919003019030"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              border: "2px solid rgba(255,255,255,0.4)", color: "#fff", padding: "14px 36px", borderRadius: 50,
-              fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 13, letterSpacing: 1.5,
-              textTransform: "uppercase", textDecoration: "none", transition: "all 0.2s",
-            }}
-            onMouseEnter={e => { e.target.style.background = "rgba(255,255,255,0.1)"; e.target.style.transform = "translateY(-3px)"; }}
-            onMouseLeave={e => { e.target.style.background = "transparent"; e.target.style.transform = "translateY(0)"; }}
-          >
-            💬 WhatsApp Us
-          </a>
-        </div>
-
-        {/* Stats */}
-        <div style={{ display: "flex", gap: 48, justifyContent: "center", marginTop: 64, flexWrap: "wrap" }}>
-          {[["10+", "Chai Varieties"], ["Fresh", "Daily Pastries"], ["09 AM", "Opens Daily"]].map(([num, label]) => (
-            <div key={label} style={{ textAlign: "center" }}>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: "#f5c842", fontWeight: 700 }}>{num}</div>
-              <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "rgba(255,255,255,0.5)", letterSpacing: 2, textTransform: "uppercase", marginTop: 4 }}>{label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Scroll indicator */}
-      <div style={{ position: "absolute", bottom: 32, left: "50%", transform: "translateX(-50%)", animation: "bounce 2s infinite" }}>
-        <div style={{ width: 24, height: 40, border: "2px solid rgba(255,255,255,0.3)", borderRadius: 12, display: "flex", justifyContent: "center", paddingTop: 6 }}>
-          <div style={{ width: 3, height: 8, background: "#f5c842", borderRadius: 2, animation: "scrollDot 1.5s infinite" }} />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ── About ─────────────────────────────────────────────────────────────────
-function About() {
-  return (
-    <section id="about" style={{ background: "#faf6f1", padding: "100px 24px" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}>
+    <section id="home" className="hero section-padding">
+      <div className="hero-backdrop" />
+      <ThreeCoffeeMotion />
+      <div className="hero-orb orb-1" />
+      <div className="hero-orb orb-2" />
+      <div className="hero-orb orb-3" />
+      <div className="container hero-grid">
         <div>
-          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#b5651d", marginBottom: 16 }}>
-            ✦ Our Story
+          <div className="eyebrow">✦ Purasaiwakkam, Chennai</div>
+          <h1>
+            Breakfast Cafe
+            <span>Freshly Brewed</span>
+          </h1>
+          <p>
+            Start your day with freshly brewed coffee, homemade pastries, and a warm cup of milk chai at swayedovercoffee.
+          </p>
+          <div className="hero-actions">
+            <a href="#menu" className="solid-btn">View Menu</a>
+            <a href="https://wa.me/919003019030" target="_blank" rel="noopener noreferrer" className="ghost-btn">WhatsApp Us</a>
           </div>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(32px, 4vw, 50px)", color: "#2c1a0e", lineHeight: 1.2, marginBottom: 24 }}>
-            Where Every Cup<br /><em>Tells a Story</em>
-          </h2>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: "#6b4226", lineHeight: 1.9, marginBottom: 20 }}>
-            Nestled at 113, PH Road, Purasaiwakkam, Chennai, swayedovercoffee is a breakfast café crafted with love. We believe mornings should begin with something extraordinary — whether that's a Saffroni Swayed Chai, a frothy cold coffee, or a warm Bun Butter Jam.
-          </p>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: "#6b4226", lineHeight: 1.9, marginBottom: 32 }}>
-            From the first sip of Traditional Filter Coffee to the last bite of a crispy Osmania Biscuit, every item is prepared fresh, every day. Come as a stranger, leave as family.
-          </p>
-          <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-            {["Fresh Daily", "Authentic Recipes", "Warm Ambiance"].map(tag => (
-              <span key={tag} style={{ background: "#fff", border: "1px solid rgba(181,101,29,0.25)", borderRadius: 50, padding: "8px 18px", fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#b5651d", letterSpacing: 0.5 }}>
-                ✓ {tag}
-              </span>
+
+          <div className="hero-shot-row" aria-hidden="true">
+            {heroShots.map((src) => (
+              <img key={src} src={src} alt="Coffee moments" />
             ))}
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-          {[
-            "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80",
-            "https://images.unsplash.com/photo-1561047029-3000c68339ca?w=400&q=80",
-            "https://images.unsplash.com/photo-1556909114-44e3e70034e2?w=400&q=80",
-            "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=400&q=80",
-          ].map((src, i) => (
-            <div
-              key={i}
-              style={{
-                borderRadius: 16, overflow: "hidden", height: i % 2 === 0 ? 200 : 160,
-                boxShadow: "0 8px 24px rgba(120,60,20,0.12)",
-                transform: i === 1 ? "translateY(24px)" : i === 3 ? "translateY(-16px)" : "none",
-                transition: "transform 0.3s",
-              }}
-              onMouseEnter={e => e.currentTarget.style.transform = `translateY(${i === 1 ? "20px" : i === 3 ? "-20px" : "-4px"})`}
-              onMouseLeave={e => e.currentTarget.style.transform = `translateY(${i === 1 ? "24px" : i === 3 ? "-16px" : "0"})`}
-            >
-              <img src={src} alt="café" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        <div className="hero-card">
+          <h3>Today at Swayed</h3>
+          <ul>
+            <li><span>10+ Chai Varieties</span><strong>Daily</strong></li>
+            <li><span>Fresh Buns & Pastries</span><strong>Housemade</strong></li>
+            <li><span>Opening Time</span><strong>09:00 AM</strong></li>
+          </ul>
+
+          <div className="coffee-visual" aria-hidden="true">
+            <div className="smoke-clouds">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <span key={index} className={`smoke smoke-${index + 1}`} />
+              ))}
             </div>
-          ))}
+            <div className="cup" />
+            <div className="cup-base" />
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
-// ── Gallery / Snapshots ───────────────────────────────────────────────────
-function Gallery() {
-  const images = [
-    { src: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&q=80", label: "Fresh Brew" },
-    { src: "https://images.unsplash.com/photo-1556909114-44e3e70034e2?w=600&q=80", label: "Masala Chai" },
-    { src: "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?w=600&q=80", label: "Morning Pastries" },
-    { src: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=600&q=80", label: "Latte Art" },
-    { src: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&q=80", label: "Cozy Corners" },
-    { src: "https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=600&q=80", label: "Café Vibes" },
+function About() {
+  const storyCards = [
+    {
+      title: "The Beginning",
+      text: "In 2010, swayedovercoffee was founded by Jane and John Doe. With a passion for great coffee and delicious food, they built a welcoming gathering spot that quickly became a favorite.",
+      image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=1200&q=80",
+    },
+    {
+      title: "Expansion and Growth",
+      text: "Over the years, we expanded with a full kitchen, talented chefs and baristas, and an evolving menu sourced from trusted local farmers and suppliers.",
+      image: "https://images.unsplash.com/photo-1556909114-44e3e70034e2?w=1200&q=80",
+    },
+    {
+      title: "Our Philosophy",
+      text: "We serve high-quality food and drinks in a warm environment, using local and sustainable ingredients whenever possible to keep every cup and plate meaningful.",
+      image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=1200&q=80",
+    },
   ];
 
   return (
-    <section id="gallery" style={{ background: "#2c1a0e", padding: "100px 24px" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 60 }}>
-          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#b5651d", marginBottom: 16 }}>✦ Gallery</div>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(32px, 4vw, 50px)", color: "#fff", lineHeight: 1.2 }}>
-            Snapshots from<br /><em style={{ color: "#f5c842" }}>swayedovercoffee</em>
-          </h2>
-        </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
-          {images.map((img, i) => (
-            <div
-              key={i}
-              style={{ position: "relative", borderRadius: 16, overflow: "hidden", height: i === 0 || i === 5 ? 280 : 220, cursor: "pointer" }}
-              onMouseEnter={e => {
-                e.currentTarget.querySelector("img").style.transform = "scale(1.08)";
-                e.currentTarget.querySelector(".overlay").style.opacity = 1;
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.querySelector("img").style.transform = "scale(1)";
-                e.currentTarget.querySelector(".overlay").style.opacity = 0;
-              }}
-            >
-              <img src={img.src} alt={img.label} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.5s ease" }} />
-              <div className="overlay" style={{ position: "absolute", inset: 0, background: "rgba(44,26,14,0.5)", display: "flex", alignItems: "center", justifyContent: "center", opacity: 0, transition: "opacity 0.3s" }}>
-                <span style={{ fontFamily: "'Playfair Display', serif", color: "#f5c842", fontSize: 18, fontStyle: "italic" }}>{img.label}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Video section */}
-        <div style={{ marginTop: 60, borderRadius: 20, overflow: "hidden", position: "relative", background: "#1a0d06", padding: 40, textAlign: "center" }}>
-          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#b5651d", marginBottom: 16 }}>✦ Featured Video</div>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "rgba(255,255,255,0.65)", marginBottom: 24 }}>
-            Check out this great video featuring freshly brewed coffee and delicious homemade pastries, perfect for enjoying with a warm cup of milk chai.
+    <section id="about" className="section-padding">
+      <div className="container about-modern-wrap">
+        <div className="about-head">
+          <div className="eyebrow">✦ Our Story</div>
+          <h2>Our Journey Through the Years</h2>
+          <p>
+            A modern story wall that highlights our journey, growth, and philosophy — each chapter presented on curated café imagery.
           </p>
-          <div style={{ position: "relative", paddingBottom: "42%", height: 0, borderRadius: 12, overflow: "hidden" }}>
-            <iframe
-              src="https://www.youtube.com/embed/dQw4w9WgXcQ?controls=1&rel=0"
-              title="swayedovercoffee video"
-              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", border: "none", borderRadius: 12 }}
-              allowFullScreen
-            />
-          </div>
+        </div>
+
+        <div className="story-image-grid">
+          {storyCards.map((card, index) => (
+            <article
+              key={card.title}
+              className={`story-image-card story-image-card-${index + 1} ${index === 0 ? "align-left" : index === 1 ? "align-center" : "align-right"}`}
+              style={{ backgroundImage: `url('${card.image}')` }}
+            >
+              <div className="story-overlay">
+                <span className="story-kicker">Chapter {String(index + 1).padStart(2, "0")}</span>
+                <h3>{card.title}</h3>
+                <p>{card.text}</p>
+              </div>
+            </article>
+          ))}
         </div>
       </div>
     </section>
   );
 }
 
-// ── Menu ──────────────────────────────────────────────────────────────────
 function MenuSection() {
   const categories = Object.keys(menuData);
   const [activeCategory, setActiveCategory] = useState(categories[0]);
+  const [search, setSearch] = useState("");
+  const [pricedOnly, setPricedOnly] = useState(false);
+
+  const currentItems = menuData[activeCategory];
+  const visibleItems = currentItems.filter((item) => {
+    const query = search.trim().toLowerCase();
+    const textMatch =
+      query.length === 0 ||
+      item.name.toLowerCase().includes(query) ||
+      item.desc.toLowerCase().includes(query);
+    const priceMatch = !pricedOnly || item.price;
+    return textMatch && priceMatch;
+  });
 
   return (
-    <section id="menu" style={{ background: "#faf6f1", padding: "100px 24px" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 60 }}>
-          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#b5651d", marginBottom: 16 }}>✦ Our Menu</div>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(32px, 4vw, 50px)", color: "#2c1a0e", lineHeight: 1.2 }}>
-            Menu & <em>Price List</em>
-          </h2>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: "#6b4226", marginTop: 16, maxWidth: 500, margin: "16px auto 0" }}>
-            From aromatic chai to crispy snacks — everything brewed and baked with love.
-          </p>
+    <section id="menu" className="section-padding section-alt">
+      <div className="container">
+        <div className="centered-head">
+          <div className="eyebrow">✦ Our Menu</div>
+          <h2>Menu & Price List</h2>
+          <p>From aromatic chai to crispy snacks — brewed and baked with love.</p>
         </div>
 
-        {/* Category tabs */}
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", marginBottom: 48 }}>
-          {categories.map(cat => (
+        <div className="chips-wrap">
+          {categories.map((category) => (
             <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              style={{
-                padding: "10px 20px", borderRadius: 50, border: "none", cursor: "pointer",
-                fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: 0.5,
-                transition: "all 0.25s",
-                background: activeCategory === cat ? "#b5651d" : "#fff",
-                color: activeCategory === cat ? "#fff" : "#4a2c0a",
-                boxShadow: activeCategory === cat ? "0 4px 16px rgba(181,101,29,0.35)" : "0 2px 8px rgba(120,60,20,0.08)",
-                transform: activeCategory === cat ? "scale(1.04)" : "scale(1)",
-              }}
+              key={category}
+              type="button"
+              className={`chip ${activeCategory === category ? "chip-active" : ""}`}
+              onClick={() => setActiveCategory(category)}
             >
-              {categoryIcons[cat]} {cat}
+              {category} <small>({menuData[category].length})</small>
             </button>
           ))}
         </div>
 
-        {/* Menu items grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
-          {menuData[activeCategory].map((item, i) => (
-            <div
-              key={i}
-              style={{
-                background: "#fff",
-                borderRadius: 16,
-                padding: 24,
-                boxShadow: "0 4px 20px rgba(120,60,20,0.07)",
-                border: "1px solid rgba(181,101,29,0.1)",
-                transition: "transform 0.25s, box-shadow 0.25s",
-                cursor: "default",
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.transform = "translateY(-4px)";
-                e.currentTarget.style.boxShadow = "0 12px 36px rgba(120,60,20,0.15)";
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "0 4px 20px rgba(120,60,20,0.07)";
-              }}
+        <div className="menu-toolbar">
+          <div className="menu-search-wrap">
+            <span className="menu-search-icon">Search</span>
+            <input
+              className="menu-search"
+              type="text"
+              placeholder="Search drinks, snacks, pastries..."
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
+          </div>
+
+          <div className="menu-tools-right">
+            <button
+              type="button"
+              className={`chip menu-filter-toggle ${pricedOnly ? "chip-active" : ""}`}
+              onClick={() => setPricedOnly((value) => !value)}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-                <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: "#2c1a0e", fontWeight: 600, lineHeight: 1.3, flex: 1 }}>
-                  {item.name}
-                </h3>
-                {item.price && (
-                  <span style={{ background: "#fdf3e3", color: "#b5651d", borderRadius: 50, padding: "4px 12px", fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 13, marginLeft: 8, whiteSpace: "nowrap" }}>
-                    ₹{item.price}
-                  </span>
-                )}
+              {pricedOnly ? "✔" : "○"} Show only priced
+            </button>
+            <div className="menu-count">{visibleItems.length} items</div>
+          </div>
+        </div>
+
+        <div className="menu-grid">
+          {visibleItems.map((item) => (
+            <article key={item.name} className="menu-card">
+              <div className="menu-card-head">
+                <h3>{item.name}</h3>
+                {item.price ? <span>₹{item.price}</span> : <span className="price-pending">Ask Price</span>}
               </div>
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13.5, color: "#7a5c40", lineHeight: 1.7 }}>
-                {item.desc}
-              </p>
-              <div style={{ marginTop: 16, height: 2, background: "linear-gradient(90deg, #b5651d22 0%, transparent 100%)", borderRadius: 2 }} />
-            </div>
+              <p>{item.desc}</p>
+              <div className="menu-card-foot">
+                <span className="menu-category-tag">{activeCategory}</span>
+                <a
+                  href={`https://wa.me/919003019030?text=${encodeURIComponent(`Hi, I want to order ${item.name}.`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ghost-btn menu-mini-btn"
+                >
+                  Order Item
+                </a>
+              </div>
+            </article>
           ))}
         </div>
 
-        <p style={{ textAlign: "center", marginTop: 40, fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "#9a7050", fontStyle: "italic" }}>
-          * Prices may vary. Please contact us for the full updated price list.
-        </p>
+        {visibleItems.length === 0 && (
+          <div className="menu-empty">
+            <h3>No items found</h3>
+            <p>Try a different keyword or switch off the priced-only filter.</p>
+            <button type="button" className="ghost-btn" onClick={() => { setSearch(""); setPricedOnly(false); }}>
+              Reset Filters
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );
 }
 
-// ── Contact ───────────────────────────────────────────────────────────────
-function Contact() {
-  const [form, setForm] = useState({ name: "", email: "", message: "" });
-  const [sent, setSent] = useState(false);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const text = `Hello! I'm ${form.name} (${form.email}). ${form.message}`;
-    window.open(`https://wa.me/919003019030?text=${encodeURIComponent(text)}`, "_blank");
-    setSent(true);
-    setTimeout(() => setSent(false), 3000);
-  };
+function Gallery() {
+  const looped = [...galleryImages, ...galleryImages, ...galleryImages];
 
   return (
-    <section
-      id="contact"
-      style={{
-        background: "linear-gradient(160deg, #1a0d06 0%, #2c1a0e 50%, #3d200d 100%)",
-        padding: "100px 24px",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      {/* animated bg decoration */}
-      <div style={{ position: "absolute", width: 400, height: 400, borderRadius: "50%", background: "rgba(181,101,29,0.06)", top: -100, right: -100, animation: "floatUp 8s ease-in-out infinite" }} />
-      <div style={{ position: "absolute", width: 300, height: 300, borderRadius: "50%", background: "rgba(245,200,66,0.04)", bottom: -80, left: -80, animation: "floatUp 10s ease-in-out infinite reverse" }} />
-
-      <div style={{ maxWidth: 1100, margin: "0 auto", position: "relative", zIndex: 2 }}>
-        <div style={{ textAlign: "center", marginBottom: 64 }}>
-          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "#b5651d", marginBottom: 16 }}>✦ Find Us</div>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(32px, 4vw, 50px)", color: "#fff", lineHeight: 1.2 }}>
-            Come Grab <em style={{ color: "#f5c842" }}>a Cup!</em>
-          </h2>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 16, color: "rgba(255,255,255,0.65)", marginTop: 16, maxWidth: 560, margin: "16px auto 0" }}>
-            Have a question? Ready to order? Message us on WhatsApp or use the form below.
-          </p>
+    <section id="gallery" className="section-padding">
+      <div className="container">
+        <div className="centered-head">
+          <div className="eyebrow">✦ Gallery</div>
+          <h2>Snapshots from swayedovercoffee</h2>
+          <p>Fresh brews, cozy corners, and comforting food moments.</p>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 48, alignItems: "start" }}>
-          {/* Info */}
-          <div>
-            {/* Map embed */}
-            <div style={{ borderRadius: 16, overflow: "hidden", height: 240, marginBottom: 28, boxShadow: "0 8px 32px rgba(0,0,0,0.3)" }}>
-              <iframe
-                src="https://maps.google.com/maps?q=113+PH+Road+Purasaiwakkam+Chennai&output=embed"
-                title="Swayed Over Coffee Location"
-                style={{ width: "100%", height: "100%", border: "none" }}
-              />
-            </div>
-
-            {/* Details */}
-            {[
-              { icon: "📍", label: "Address", value: "113, PH Road, Purasaiwakkam, Chennai, Tamil Nadu, India" },
-              { icon: "📞", label: "Phone", value: "9003019030" },
-              { icon: "✉️", label: "Email", value: "swayedovercoffee@gmail.com" },
-              { icon: "⏰", label: "Hours", value: "Monday – Sunday: 09:00 AM – 05:00 PM" },
-            ].map(item => (
-              <div key={item.label} style={{ display: "flex", gap: 16, marginBottom: 20 }}>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(181,101,29,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>
-                  {item.icon}
-                </div>
-                <div>
-                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "#b5651d", letterSpacing: 2, textTransform: "uppercase", marginBottom: 3 }}>{item.label}</div>
-                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "rgba(255,255,255,0.8)", lineHeight: 1.5 }}>{item.value}</div>
-                </div>
-              </div>
-            ))}
-
-            {/* Social */}
-            <div style={{ display: "flex", gap: 12, marginTop: 24, flexWrap: "wrap" }}>
-              <a href="https://www.instagram.com/swayedovercoffee?igsh=ZDVkaXc4czIxamd6" target="_blank" rel="noopener noreferrer"
-                style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 50, padding: "8px 16px", textDecoration: "none", fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#fff", transition: "all 0.2s" }}
-                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.15)"}
-                onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.08)"}
-              >
-                📸 Instagram
-              </a>
-              <a href="https://swayedovercoffee.com" target="_blank" rel="noopener noreferrer"
-                style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 50, padding: "8px 16px", textDecoration: "none", fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#fff", transition: "all 0.2s" }}
-                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.15)"}
-                onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.08)"}
-              >
-                ▶️ YouTube
-              </a>
-              <a href="https://wa.me/919003019030" target="_blank" rel="noopener noreferrer"
-                style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(37,211,102,0.15)", border: "1px solid rgba(37,211,102,0.3)", borderRadius: 50, padding: "8px 16px", textDecoration: "none", fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#25d366", transition: "all 0.2s" }}
-                onMouseEnter={e => e.currentTarget.style.background = "rgba(37,211,102,0.25)"}
-                onMouseLeave={e => e.currentTarget.style.background = "rgba(37,211,102,0.15)"}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                WhatsApp
-              </a>
+        <div className="gallery-marquee-wrap">
+          <div className="gallery-marquee">
+            <div className="gallery-track">
+              {looped.map((image, index) => (
+                <figure key={`row1-${image.src}-${index}`} className="gallery-item gallery-marquee-item">
+                  <img src={image.src} alt={image.label} />
+                  <figcaption>{image.label}</figcaption>
+                </figure>
+              ))}
             </div>
           </div>
 
-          {/* Contact form */}
-          <form onSubmit={handleSubmit} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, padding: 36, backdropFilter: "blur(12px)" }}>
-            <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, color: "#fff", marginBottom: 24, fontWeight: 600 }}>Send a Message</h3>
-            {[
-              { field: "name", label: "Your Name", type: "text", placeholder: "e.g. Priya S." },
-              { field: "email", label: "Email Address", type: "email", placeholder: "your@email.com" },
-            ].map(({ field, label, type, placeholder }) => (
-              <div key={field} style={{ marginBottom: 20 }}>
-                <label style={{ display: "block", fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#b5651d", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>{label}</label>
-                <input
-                  type={type}
-                  placeholder={placeholder}
-                  value={form[field]}
-                  onChange={e => setForm({ ...form, [field]: e.target.value })}
-                  required
-                  style={{ width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 10, padding: "12px 16px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#fff", outline: "none", boxSizing: "border-box", transition: "border-color 0.2s" }}
-                  onFocus={e => e.target.style.borderColor = "#b5651d"}
-                  onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.15)"}
-                />
-              </div>
-            ))}
-            <div style={{ marginBottom: 24 }}>
-              <label style={{ display: "block", fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#b5651d", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>Message</label>
-              <textarea
-                rows={4}
-                placeholder="Tell us what you need — delivery, pickup, a custom order..."
-                value={form.message}
-                onChange={e => setForm({ ...form, message: e.target.value })}
-                required
-                style={{ width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 10, padding: "12px 16px", fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#fff", outline: "none", resize: "vertical", boxSizing: "border-box", transition: "border-color 0.2s" }}
-                onFocus={e => e.target.style.borderColor = "#b5651d"}
-                onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.15)"}
-              />
+          <div className="gallery-marquee reverse">
+            <div className="gallery-track slower">
+              {looped.map((image, index) => (
+                <figure key={`row2-${image.src}-${index}`} className="gallery-item gallery-marquee-item">
+                  <img src={image.src} alt={image.label} />
+                  <figcaption>{image.label}</figcaption>
+                </figure>
+              ))}
             </div>
-            <button
-              type="submit"
-              style={{
-                width: "100%", background: "#25d366", color: "#fff", border: "none", borderRadius: 50, padding: "14px 24px",
-                fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 14, letterSpacing: 1, cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-                boxShadow: "0 6px 24px rgba(37,211,102,0.35)", transition: "transform 0.2s, background 0.2s",
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = "#1da851"}
-              onMouseLeave={e => e.currentTarget.style.background = "#25d366"}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-              {sent ? "Redirecting to WhatsApp ✓" : "Message on WhatsApp"}
-            </button>
-          </form>
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
-// ── Footer ────────────────────────────────────────────────────────────────
+function Contact() {
+  const [form, setForm] = useState({ name: "", email: "", message: "" });
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const text = `Hello! I'm ${form.name} (${form.email}). ${form.message}`;
+    window.open(`https://wa.me/919003019030?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  return (
+    <section id="contact" className="section-padding section-alt">
+      <div className="container contact-grid">
+        <div className="contact-panel">
+          <div className="eyebrow">✦ Find Us</div>
+          <h2>Come Grab a Cup</h2>
+          <p>Have a question or want to place an order? Message us on WhatsApp anytime.</p>
+
+          <div className="detail-list">
+            <div><strong>Address:</strong> 113, PH Road, Purasaiwakkam, Chennai</div>
+            <div><strong>Phone:</strong> 9003019030</div>
+            <div><strong>Email:</strong> swayedovercoffee@gmail.com</div>
+            <div><strong>Hours:</strong> Monday – Sunday, 09:00 AM – 05:00 PM</div>
+          </div>
+
+          <div className="contact-actions">
+            <a href="https://wa.me/919003019030" target="_blank" rel="noopener noreferrer" className="solid-btn">WhatsApp</a>
+            <a href="https://www.instagram.com/swayedovercoffee?igsh=ZDVkaXc4czIxamd6" target="_blank" rel="noopener noreferrer" className="ghost-btn">Instagram</a>
+          </div>
+        </div>
+
+        <form className="form-card" onSubmit={handleSubmit}>
+          <h3>Send a Message</h3>
+          <label>
+            Your Name
+            <input
+              type="text"
+              required
+              value={form.name}
+              onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
+              placeholder="e.g. Priya S."
+            />
+          </label>
+
+          <label>
+            Email Address
+            <input
+              type="email"
+              required
+              value={form.email}
+              onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
+              placeholder="your@email.com"
+            />
+          </label>
+
+          <label>
+            Message
+            <textarea
+              rows={4}
+              required
+              value={form.message}
+              onChange={(event) => setForm((current) => ({ ...current, message: event.target.value }))}
+              placeholder="Tell us what you need..."
+            />
+          </label>
+
+          <button type="submit" className="solid-btn">Message on WhatsApp</button>
+        </form>
+      </div>
+    </section>
+  );
+}
+
 function Footer() {
   return (
-    <footer style={{ background: "#0f0704", borderTop: "1px solid rgba(181,101,29,0.2)", padding: "32px 24px", textAlign: "center" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 12 }}>
-        <div style={{ width: 30, height: 30, borderRadius: "50%", background: "linear-gradient(135deg,#b5651d,#8b4513)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>☕</div>
-        <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 15, color: "#b5651d", fontWeight: 600 }}>swayedovercoffee</span>
+    <footer className="footer">
+      <div className="container footer-inner">
+        <p>© 2026 swayedovercoffee — All Rights Reserved.</p>
+        <p>113, PH Road, Purasaiwakkam, Chennai, Tamil Nadu, India</p>
       </div>
-      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "rgba(255,255,255,0.3)", letterSpacing: 0.5 }}>
-        Copyright © 2026 swayedovercoffee — All Rights Reserved.
-      </p>
-      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "rgba(255,255,255,0.2)", marginTop: 6 }}>
-        113, PH Road, Purasaiwakkam, Chennai, Tamil Nadu, India
-      </p>
     </footer>
   );
 }
 
-// ── Floating WhatsApp button ──────────────────────────────────────────────
 function WhatsAppFAB() {
-  const [hovered, setHovered] = useState(false);
   return (
-    <a
-      href="https://wa.me/919003019030"
-      target="_blank"
-      rel="noopener noreferrer"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        position: "fixed", bottom: 32, right: 32, zIndex: 999,
-        width: 58, height: 58, borderRadius: "50%",
-        background: "#25d366",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        boxShadow: hovered ? "0 8px 32px rgba(37,211,102,0.6)" : "0 4px 20px rgba(37,211,102,0.4)",
-        transform: hovered ? "scale(1.12)" : "scale(1)",
-        transition: "all 0.25s ease",
-        textDecoration: "none",
-      }}
-    >
-      {/* Pulse ring */}
-      <div style={{
-        position: "absolute", width: "100%", height: "100%", borderRadius: "50%",
-        border: "2px solid #25d366", animation: "whatsappPulse 2s ease-out infinite",
-      }} />
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="white">
-        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-      </svg>
+    <a href="https://wa.me/919003019030" target="_blank" rel="noopener noreferrer" className="fab" aria-label="Open WhatsApp">
+      💬
     </a>
   );
 }
 
-// ── App ───────────────────────────────────────────────────────────────────
 export default function App() {
+  const [theme, setTheme] = useState(() => {
+    const stored = localStorage.getItem("swayed-theme");
+    if (stored === "light" || stored === "dark") return stored;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("swayed-theme", theme);
+  }, [theme]);
+
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
 
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+          --bg: #faf6f1;
+          --bg-elevated: #ffffff;
+          --bg-soft: #f2e8dd;
+          --text: #2a1c12;
+          --muted: #6e4f3a;
+          --brand: #b5651d;
+          --brand-strong: #8b4513;
+          --stroke: rgba(181, 101, 29, 0.18);
+          --shadow: 0 16px 34px rgba(34, 16, 8, 0.08);
+        }
+
+        :root[data-theme='dark'] {
+          --bg: #130c08;
+          --bg-elevated: #1f1510;
+          --bg-soft: #2a1d15;
+          --text: #f6e6d4;
+          --muted: #c8a989;
+          --brand: #f0a856;
+          --brand-strong: #dc8f3a;
+          --stroke: rgba(240, 168, 86, 0.24);
+          --shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+        }
+
+        * { box-sizing: border-box; }
         html { scroll-behavior: smooth; }
         body {
-          background: #faf6f1;
-          width: 100vw;
-          min-width: 100vw;
+          margin: 0;
+          font-family: 'DM Sans', sans-serif;
+          background: var(--bg);
+          color: var(--text);
+        }
+
+        #root {
+          width: 100%;
+          max-width: none;
           margin: 0;
           padding: 0;
-          overflow-x: hidden;
+          text-align: left;
         }
-        main {
-          width: 100vw;
-          min-width: 100vw;
+
+        .container {
+          width: min(1120px, calc(100% - 2rem));
+          margin: 0 auto;
+        }
+
+        .section-padding { padding: 96px 0; }
+        .section-alt { background: var(--bg-soft); }
+
+        .eyebrow {
+          color: var(--brand);
+          text-transform: uppercase;
+          letter-spacing: 0.18em;
+          font-size: 0.72rem;
+          font-weight: 600;
+          margin-bottom: 0.75rem;
+        }
+
+        h1, h2, h3 {
+          font-family: 'Playfair Display', serif;
           margin: 0;
+        }
+
+        h2 {
+          font-size: clamp(2rem, 3.5vw, 3rem);
+          line-height: 1.2;
+          margin-bottom: 0.8rem;
+        }
+
+        p { color: var(--muted); line-height: 1.8; }
+
+        .nav-shell {
+          position: sticky;
+          top: 0;
+          z-index: 50;
+          backdrop-filter: blur(10px);
+          background: color-mix(in srgb, var(--bg) 80%, transparent);
+          border-bottom: 1px solid var(--stroke);
+          transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .nav-shell.is-scrolled {
+          background: color-mix(in srgb, var(--bg-elevated) 88%, transparent);
+          box-shadow: 0 10px 26px rgba(10, 10, 10, 0.12);
+          border-color: color-mix(in srgb, var(--brand) 28%, transparent);
+        }
+
+        .nav-row {
+          min-height: 78px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1rem;
+        }
+
+        .brand {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          text-decoration: none;
+          color: inherit;
+        }
+
+        .brand-logo {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 1px solid var(--stroke);
+        }
+
+        .brand-title { font-weight: 700; }
+        .brand-subtitle { font-size: 0.68rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--brand); }
+
+        .nav-links {
+          display: flex;
+          gap: 0.45rem;
+          align-items: center;
+          padding: 0.34rem;
+          border-radius: 999px;
+          background: color-mix(in srgb, var(--bg-elevated) 76%, transparent);
+          border: 1px solid var(--stroke);
+        }
+
+        .nav-link {
+          padding: 0.5rem 0.9rem;
+          border-radius: 999px;
+          text-decoration: none;
+          color: var(--muted);
+          font-size: 0.9rem;
+          font-weight: 500;
+          transition: color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+        }
+
+        .nav-link:hover {
+          color: var(--text);
+          background: color-mix(in srgb, var(--brand) 14%, transparent);
+          transform: translateY(-1px);
+        }
+
+        .nav-cta { display: flex; gap: 0.75rem; align-items: center; }
+
+        .solid-btn,
+        .ghost-btn,
+        .theme-btn,
+        .menu-toggle,
+        .chip {
+          border: 1px solid transparent;
+          border-radius: 999px;
+          padding: 0.72rem 1rem;
+          font-size: 0.86rem;
+          font-weight: 600;
+          font-family: inherit;
+          cursor: pointer;
+          text-decoration: none;
+          transition: 0.22s ease;
+        }
+
+        .solid-btn {
+          background: linear-gradient(135deg, var(--brand), var(--brand-strong));
+          color: #fff;
+          box-shadow: var(--shadow);
+        }
+        .solid-btn:hover { transform: translateY(-1px); }
+
+        .ghost-btn,
+        .theme-btn {
+          background: transparent;
+          border-color: var(--stroke);
+          color: var(--text);
+        }
+        .ghost-btn:hover,
+        .theme-btn:hover,
+        .chip:hover {
+          background: color-mix(in srgb, var(--brand) 12%, transparent);
+        }
+
+        .desktop-only { display: flex; }
+        .mobile-only { display: none; }
+        .mobile-actions {
+          align-items: center;
+          gap: 0.45rem;
+        }
+
+        .mobile-theme-btn {
+          width: 42px;
+          height: 42px;
           padding: 0;
+          display: grid;
+          place-items: center;
+          font-size: 1rem;
         }
 
-        @keyframes floatUp {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(5deg); }
-        }
-        @keyframes bounce {
-          0%, 100% { transform: translateX(-50%) translateY(0); }
-          50% { transform: translateX(-50%) translateY(-8px); }
-        }
-        @keyframes scrollDot {
-          0% { opacity: 1; transform: translateY(0); }
-          100% { opacity: 0; transform: translateY(16px); }
-        }
-        @keyframes whatsappPulse {
-          0% { transform: scale(1); opacity: 0.8; }
-          100% { transform: scale(1.8); opacity: 0; }
+        .hero {
+          position: relative;
+          overflow: hidden;
+          background: radial-gradient(circle at top right, color-mix(in srgb, var(--brand) 28%, transparent), transparent 36%), var(--bg);
         }
 
-        .desktop-nav { display: flex !important; }
-        .mobile-hamburger { display: none !important; }
-
-        @media (max-width: 768px) {
-          .desktop-nav { display: none !important; }
-          .mobile-hamburger { display: flex !important; }
+        .three-motion {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          pointer-events: none;
+          opacity: 0.9;
+          mix-blend-mode: screen;
         }
 
-        /* About & contact grid responsive */
+        :root[data-theme='light'] .three-motion {
+          opacity: 0.75;
+          mix-blend-mode: multiply;
+        }
+
+        .three-motion canvas {
+          width: 100% !important;
+          height: 100% !important;
+          display: block;
+        }
+
+        .hero-backdrop {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(120deg, rgba(0,0,0,0.2), rgba(0,0,0,0));
+          pointer-events: none;
+          z-index: 0;
+        }
+
+        .hero-orb {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(20px);
+          opacity: 0.45;
+          pointer-events: none;
+          animation: orbFloat 12s ease-in-out infinite;
+          z-index: 0;
+        }
+
+        .orb-1 {
+          width: 220px;
+          height: 220px;
+          top: 10%;
+          right: 10%;
+          background: color-mix(in srgb, var(--brand) 42%, transparent);
+        }
+
+        .orb-2 {
+          width: 170px;
+          height: 170px;
+          bottom: 12%;
+          right: 28%;
+          animation-delay: 2.6s;
+          background: color-mix(in srgb, var(--text) 20%, transparent);
+        }
+
+        .orb-3 {
+          width: 140px;
+          height: 140px;
+          top: 24%;
+          left: 6%;
+          animation-delay: 4.2s;
+          background: color-mix(in srgb, var(--brand) 28%, transparent);
+        }
+
+        .hero-grid {
+          position: relative;
+          z-index: 1;
+          min-height: calc(100vh - 72px);
+          display: grid;
+          grid-template-columns: 1.3fr 1fr;
+          align-items: center;
+          gap: 2rem;
+        }
+
+        .hero h1 {
+          font-size: clamp(2.4rem, 7vw, 4.8rem);
+          line-height: 1.04;
+          margin-bottom: 1rem;
+        }
+
+        .hero h1 span {
+          display: block;
+          color: var(--brand);
+          font-style: italic;
+        }
+
+        .hero p { max-width: 58ch; margin-bottom: 1.4rem; }
+        .hero-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+        .hero-shot-row {
+          display: flex;
+          align-items: center;
+          margin-top: 1.4rem;
+          gap: 0.6rem;
+        }
+
+        .hero-shot-row img {
+          width: 72px;
+          height: 72px;
+          border-radius: 14px;
+          object-fit: cover;
+          border: 1px solid var(--stroke);
+          box-shadow: var(--shadow);
+          animation: shotFloat 6s ease-in-out infinite;
+        }
+
+        .hero-shot-row img:nth-child(2) {
+          animation-delay: 1.4s;
+          transform: translateY(-6px);
+        }
+
+        .hero-shot-row img:nth-child(3) {
+          animation-delay: 2.5s;
+        }
+
+        .hero-card {
+          background: color-mix(in srgb, var(--bg-elevated) 84%, transparent);
+          border: 1px solid var(--stroke);
+          border-radius: 20px;
+          padding: 1.4rem;
+          box-shadow: var(--shadow);
+        }
+
+        .hero-card h3 {
+          font-size: 1.5rem;
+          margin-bottom: 0.9rem;
+        }
+
+        .hero-card ul {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          display: grid;
+          gap: 0.7rem;
+        }
+
+        .hero-card li {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border: 1px solid var(--stroke);
+          border-radius: 12px;
+          padding: 0.78rem 0.88rem;
+        }
+
+        .hero-card li span { color: var(--muted); }
+
+        .coffee-visual {
+          position: relative;
+          margin-top: 1rem;
+          height: 140px;
+          display: grid;
+          place-items: end center;
+          overflow: hidden;
+        }
+
+        .smoke-clouds {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+        }
+
+        .smoke {
+          position: absolute;
+          bottom: 38px;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: color-mix(in srgb, var(--text) 24%, transparent);
+          filter: blur(1px);
+          opacity: 0;
+          animation: smokeRise 4.8s ease-in infinite;
+        }
+
+        .smoke-1 { left: 44%; animation-delay: 0s; }
+        .smoke-2 { left: 48%; animation-delay: 0.5s; }
+        .smoke-3 { left: 52%; animation-delay: 1.1s; }
+        .smoke-4 { left: 46%; animation-delay: 1.6s; }
+        .smoke-5 { left: 50%; animation-delay: 2.2s; }
+        .smoke-6 { left: 54%; animation-delay: 2.9s; }
+        .smoke-7 { left: 47%; animation-delay: 3.4s; }
+        .smoke-8 { left: 51%; animation-delay: 4s; }
+
+        .cup {
+          width: 126px;
+          height: 70px;
+          border-radius: 0 0 26px 26px;
+          border: 2px solid var(--stroke);
+          border-top: 6px solid color-mix(in srgb, var(--brand) 45%, transparent);
+          background: linear-gradient(180deg, color-mix(in srgb, var(--bg-elevated) 70%, var(--brand) 30%), var(--bg-elevated));
+          position: relative;
+          box-shadow: inset 0 -10px 18px color-mix(in srgb, var(--brand) 15%, transparent);
+        }
+
+        .cup::after {
+          content: "";
+          position: absolute;
+          right: -16px;
+          top: 18px;
+          width: 18px;
+          height: 22px;
+          border: 2px solid var(--stroke);
+          border-left: none;
+          border-radius: 0 12px 12px 0;
+        }
+
+        .cup-base {
+          width: 160px;
+          height: 14px;
+          border-radius: 999px;
+          background: color-mix(in srgb, var(--brand) 30%, transparent);
+          margin-top: 8px;
+          animation: cupFloat 3.6s ease-in-out infinite;
+        }
+
+        @keyframes smokeRise {
+          0% {
+            transform: translateY(0) translateX(0) scale(0.6);
+            opacity: 0;
+          }
+          20% {
+            opacity: 0.38;
+          }
+          70% {
+            opacity: 0.22;
+          }
+          100% {
+            transform: translateY(-88px) translateX(18px) scale(1.8);
+            opacity: 0;
+          }
+        }
+
+        @keyframes cupFloat {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-3px); }
+        }
+
+        @keyframes shotFloat {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-7px); }
+        }
+
+        @keyframes orbFloat {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          35% { transform: translate(-12px, 12px) scale(1.04); }
+          65% { transform: translate(8px, -10px) scale(0.96); }
+        }
+
+        .contact-grid {
+          display: grid;
+          grid-template-columns: 1.1fr 1fr;
+          gap: 2rem;
+          align-items: start;
+        }
+
+        .about-modern-wrap {
+          display: grid;
+          gap: 1.25rem;
+        }
+
+        .about-head {
+          text-align: center;
+          max-width: 760px;
+          margin: 0 auto;
+        }
+
+        .story-image-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 1rem;
+        }
+
+        .story-image-card {
+          min-height: 320px;
+          border-radius: 18px;
+          overflow: hidden;
+          position: relative;
+          background-size: cover;
+          background-position: center;
+          border: 1px solid var(--stroke);
+          box-shadow: var(--shadow);
+          animation: drift 10s ease-in-out infinite;
+          transition: transform 0.24s ease, box-shadow 0.24s ease;
+        }
+
+        .story-image-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 22px 36px rgba(8, 8, 8, 0.18);
+        }
+
+        .story-image-card-2 { min-height: 360px; animation-delay: 1.4s; }
+        .story-image-card-3 { min-height: 330px; animation-delay: 2.4s; }
+
+        .story-overlay {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+          padding: 1rem;
+          background: linear-gradient(to top, rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 0.24) 50%, rgba(0, 0, 0, 0.02));
+        }
+
+        .story-image-card.align-left .story-overlay {
+          text-align: left;
+          align-items: flex-start;
+        }
+
+        .story-image-card.align-center .story-overlay {
+          text-align: center;
+          align-items: center;
+        }
+
+        .story-image-card.align-right .story-overlay {
+          text-align: right;
+          align-items: flex-end;
+        }
+
+        .story-kicker {
+          display: inline-flex;
+          font-size: 0.68rem;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.86);
+          border: 1px solid rgba(255, 255, 255, 0.32);
+          border-radius: 999px;
+          padding: 0.26rem 0.52rem;
+          margin-bottom: 0.5rem;
+          background: rgba(0, 0, 0, 0.22);
+        }
+
+        .story-overlay h3 {
+          color: #fff;
+          margin-bottom: 0.4rem;
+          font-size: clamp(1.1rem, 2vw, 1.4rem);
+        }
+
+        .story-overlay p {
+          color: rgba(255, 255, 255, 0.9);
+          margin: 0;
+          font-size: 0.92rem;
+          line-height: 1.65;
+          max-width: 30ch;
+        }
+
+        @keyframes drift {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-8px); }
+        }
+
+        .centered-head {
+          text-align: center;
+          max-width: 680px;
+          margin: 0 auto 1.7rem;
+        }
+
+        .chips-wrap {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 0.55rem;
+          margin-bottom: 1.4rem;
+        }
+
+        .chip small {
+          opacity: 0.8;
+          font-size: 0.72rem;
+          font-weight: 600;
+        }
+
+        .menu-toolbar {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 0.8rem;
+          margin-bottom: 1rem;
+          flex-wrap: wrap;
+        }
+
+        .menu-search-wrap {
+          flex: 1;
+          min-width: 230px;
+          display: flex;
+          align-items: center;
+          gap: 0.55rem;
+          border: 1px solid var(--stroke);
+          border-radius: 14px;
+          padding: 0.62rem 0.78rem;
+          background: var(--bg-elevated);
+          box-shadow: var(--shadow);
+        }
+
+        .menu-search-icon {
+          font-size: 0.9rem;
+          opacity: 0.8;
+        }
+
+        .menu-search {
+          width: 100%;
+          border: none;
+          background: transparent;
+          color: var(--text);
+          outline: none;
+          font: inherit;
+        }
+
+        .menu-search::placeholder {
+          color: color-mix(in srgb, var(--muted) 70%, transparent);
+        }
+
+        .menu-tools-right {
+          display: flex;
+          align-items: center;
+          gap: 0.55rem;
+          flex-wrap: wrap;
+        }
+
+        .menu-filter-toggle {
+          padding-inline: 0.86rem;
+        }
+
+        .menu-count {
+          border: 1px solid var(--stroke);
+          border-radius: 999px;
+          padding: 0.5rem 0.85rem;
+          color: var(--muted);
+          font-size: 0.82rem;
+          font-weight: 600;
+          background: var(--bg-elevated);
+        }
+
+        .chip {
+          background: var(--bg-elevated);
+          border-color: var(--stroke);
+          color: var(--muted);
+        }
+
+        .chip-active {
+          background: linear-gradient(135deg, var(--brand), var(--brand-strong));
+          color: #fff;
+          border-color: transparent;
+        }
+
+        .menu-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+          gap: 0.95rem;
+        }
+
+        .menu-card {
+          background: var(--bg-elevated);
+          border: 1px solid var(--stroke);
+          border-radius: 16px;
+          padding: 1rem;
+          box-shadow: var(--shadow);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .menu-card:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 18px 36px rgba(10, 10, 10, 0.14);
+        }
+
+        .menu-card-head {
+          display: flex;
+          justify-content: space-between;
+          gap: 0.7rem;
+          margin-bottom: 0.4rem;
+        }
+
+        .menu-card h3 { font-size: 1.1rem; }
+
+        .menu-card-head span {
+          background: color-mix(in srgb, var(--brand) 18%, transparent);
+          color: var(--brand);
+          border-radius: 999px;
+          padding: 0.2rem 0.56rem;
+          height: fit-content;
+          font-size: 0.8rem;
+          font-weight: 700;
+        }
+
+        .menu-card p { margin: 0; font-size: 0.92rem; }
+
+        .price-pending {
+          color: var(--muted);
+          background: color-mix(in srgb, var(--text) 8%, transparent);
+        }
+
+        .menu-card-foot {
+          margin-top: 0.9rem;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.6rem;
+        }
+
+        .menu-category-tag {
+          font-size: 0.75rem;
+          color: var(--muted);
+          border: 1px solid var(--stroke);
+          border-radius: 999px;
+          padding: 0.3rem 0.52rem;
+          background: color-mix(in srgb, var(--bg) 80%, transparent);
+        }
+
+        .menu-mini-btn {
+          font-size: 0.78rem;
+          padding: 0.42rem 0.65rem;
+        }
+
+        .menu-empty {
+          margin-top: 1.1rem;
+          border: 1px dashed var(--stroke);
+          border-radius: 16px;
+          text-align: center;
+          padding: 1.2rem;
+          background: color-mix(in srgb, var(--bg-elevated) 84%, transparent);
+        }
+
+        .menu-empty h3 {
+          margin-bottom: 0.35rem;
+          font-size: 1.2rem;
+        }
+
+        .menu-empty p {
+          margin: 0 0 0.9rem;
+        }
+
+        .gallery-marquee-wrap {
+          display: grid;
+          gap: 1rem;
+        }
+
+        .gallery-marquee {
+          overflow: hidden;
+          border-radius: 18px;
+          border: 1px solid var(--stroke);
+          background: color-mix(in srgb, var(--bg-elevated) 86%, transparent);
+          box-shadow: var(--shadow);
+          mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+        }
+
+        .gallery-track {
+          display: flex;
+          width: max-content;
+          gap: 0.9rem;
+          padding: 0.9rem;
+          animation: marqueeMove 34s linear infinite;
+        }
+
+        .gallery-track.slower {
+          animation-duration: 42s;
+        }
+
+        .gallery-marquee.reverse .gallery-track {
+          animation-direction: reverse;
+        }
+
+        @keyframes marqueeMove {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+
+        .gallery-marquee-item {
+          min-width: 260px;
+          width: 260px;
+          flex: 0 0 auto;
+        }
+
+        .gallery-item {
+          margin: 0;
+          position: relative;
+          overflow: hidden;
+          border-radius: 16px;
+          border: 1px solid var(--stroke);
+        }
+
+        .gallery-item img {
+          width: 100%;
+          height: 220px;
+          object-fit: cover;
+          display: block;
+          transition: transform 0.35s ease;
+        }
+
+        .gallery-item:hover img { transform: scale(1.06); }
+
+        .gallery-item figcaption {
+          position: absolute;
+          inset: auto 0 0 0;
+          background: linear-gradient(to top, rgba(0, 0, 0, 0.72), transparent);
+          color: #fff;
+          padding: 1.2rem 0.85rem 0.8rem;
+          font-size: 0.86rem;
+        }
+
+        .contact-panel,
+        .form-card {
+          background: var(--bg-elevated);
+          border: 1px solid var(--stroke);
+          border-radius: 18px;
+          padding: 1.3rem;
+          box-shadow: var(--shadow);
+        }
+
+        .detail-list { display: grid; gap: 0.55rem; margin: 1rem 0; color: var(--muted); }
+        .contact-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+
+        .form-card {
+          display: grid;
+          gap: 0.85rem;
+        }
+
+        .form-card h3 { font-size: 1.55rem; }
+
+        .form-card label {
+          display: grid;
+          gap: 0.4rem;
+          font-size: 0.84rem;
+          color: var(--muted);
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+        }
+
+        .form-card input,
+        .form-card textarea {
+          border: 1px solid var(--stroke);
+          border-radius: 12px;
+          background: var(--bg);
+          color: var(--text);
+          font: inherit;
+          font-size: 0.92rem;
+          padding: 0.76rem 0.8rem;
+          outline: none;
+        }
+
+        .form-card input:focus,
+        .form-card textarea:focus { border-color: var(--brand); }
+
+        .form-card .solid-btn {
+          width: 100%;
+          text-align: center;
+        }
+
+        .footer {
+          border-top: 1px solid var(--stroke);
+          background: var(--bg-elevated);
+          padding: 1.1rem 0;
+        }
+
+        .footer-inner {
+          color: var(--muted);
+          font-size: 0.86rem;
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: space-between;
+          gap: 0.5rem;
+        }
+
+        .fab {
+          position: fixed;
+          right: 20px;
+          bottom: 20px;
+          width: 54px;
+          height: 54px;
+          border-radius: 50%;
+          display: grid;
+          place-items: center;
+          text-decoration: none;
+          font-size: 1.3rem;
+          color: #fff;
+          background: #25d366;
+          box-shadow: 0 10px 24px rgba(37, 211, 102, 0.38);
+          z-index: 55;
+        }
+
+        .mobile-menu {
+          border-top: 1px solid var(--stroke);
+          background: color-mix(in srgb, var(--bg-elevated) 90%, transparent);
+        }
+
+        .mobile-menu-inner {
+          display: grid;
+          gap: 0.7rem;
+          padding: 0.9rem 0;
+        }
+
+        .mobile-menu-card {
+          margin: 0.85rem auto 1rem;
+          padding: 0.9rem;
+          border-radius: 16px;
+          border: 1px solid var(--stroke);
+          background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
+          box-shadow: var(--shadow);
+        }
+
+        .mobile-link {
+          border: 1px solid var(--stroke);
+          border-radius: 12px;
+          padding: 0.7rem 0.8rem;
+          text-decoration: none;
+          color: var(--muted);
+          font-weight: 500;
+          transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .mobile-link:hover {
+          background: color-mix(in srgb, var(--brand) 14%, transparent);
+          color: var(--text);
+        }
+
+        .mobile-order {
+          margin-top: 0.2rem;
+          justify-content: center;
+          display: inline-flex;
+        }
+
+        @media (max-width: 960px) {
+          .hero-grid,
+          .contact-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .story-image-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .story-image-card {
+            min-height: 260px;
+          }
+
+          .story-image-card-2,
+          .story-image-card-3 {
+            min-height: 260px;
+          }
+
+          .story-image-card.align-right .story-overlay,
+          .story-image-card.align-center .story-overlay,
+          .story-image-card.align-left .story-overlay {
+            text-align: left;
+            align-items: flex-start;
+          }
+
+          .hero-grid { min-height: auto; }
+          .hero-orb { opacity: 0.32; }
+          .three-motion { opacity: 0.58; }
+        }
+
         @media (max-width: 860px) {
-          #about > div,
-          #contact > div > div:last-child {
-            grid-template-columns: 1fr !important;
+          .desktop-only { display: none; }
+          .mobile-only { display: flex; }
+          .section-padding { padding: 82px 0; }
+          .gallery-marquee-item {
+            min-width: 210px;
+            width: 210px;
           }
-          #gallery > div > div:first-of-type + div {
-            grid-template-columns: repeat(2, 1fr) !important;
+          .menu-toggle {
+            width: 42px;
+            height: 42px;
+            padding: 0;
+            display: grid;
+            place-items: center;
+            border-color: var(--stroke);
+            color: var(--text);
+            background: transparent;
           }
+          .footer-inner { flex-direction: column; }
         }
       `}</style>
-      <Nav />
+
+      <Nav theme={theme} toggleTheme={() => setTheme((value) => (value === "dark" ? "light" : "dark"))} />
       <main>
         <Hero />
         <About />
-        <Gallery />
         <MenuSection />
+        <Gallery />
         <Contact />
       </main>
       <Footer />
