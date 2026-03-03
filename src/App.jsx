@@ -362,7 +362,7 @@ function About() {
   const storyCards = [
     {
       title: "The Beginning",
-      text: "In 2010, swayedovercoffee was founded by Jane and John Doe. With a passion for great coffee and delicious food, they built a welcoming gathering spot that quickly became a favorite.",
+      text: "In 2010, swayedovercoffee was founded by Shagul Nizamudeen. With a passion for great coffee and delicious food, they built a welcoming gathering spot that quickly became a favorite.",
       image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=1200&q=80",
     },
     {
