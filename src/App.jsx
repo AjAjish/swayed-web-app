@@ -42,7 +42,7 @@ const menuData = {
   "Savoury Snacks": [
     { name: "Samosa (4 pcs)", price: null, desc: "Crispy pastry stuffed with spiced, savory potatoes — a beloved classic." },
     { name: "Veg Puff", price: null, desc: "Flaky pastry filled with a savory blend of fresh vegetables and aromatic spices." },
-    { name: "Paneer Puff", price: null, desc: "Flaky pastry filled with flavorful, spiced paneer — satisfying and savory." },
+    { name: "Channa Puff", price: null, desc: "Flaky pastry filled with flavorful, spiced channa — satisfying and savory." },
   ],
   Maggi: [
     { name: "Classic Maggi", price: null, desc: "Comforting instant noodles with rich, savory seasoning for a quick satisfying meal." },
@@ -64,13 +64,85 @@ const menuData = {
 };
 
 const galleryImages = [
-  { src: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=900&q=80", label: "Fresh Brew" },
-  { src: "https://images.unsplash.com/photo-1556909114-44e3e70034e2?w=900&q=80", label: "Masala Chai" },
-  { src: "https://images.unsplash.com/photo-1561047029-3000c68339ca?w=900&q=80", label: "Morning Pastries" },
-  { src: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=80", label: "Cozy Corners" },
-  { src: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=900&q=80", label: "Latte Art" },
-  { src: "https://images.unsplash.com/photo-1445116572660-236099ec97a0?w=900&q=80", label: "Cafe Vibes" },
+  { src: "/images/gallery/badam milk.png", label: "Badam Milk" },
+  { src: "/images/gallery/bottled water.png", label: "Bottled Water" },
+  { src: "/images/gallery/chees in poth.png", label: "Cheese in Pot" },
+  { src: "/images/gallery/cheese breads.png", label: "Cheese Breads" },
+  { src: "/images/gallery/cheese maggi.png", label: "Cheese Maggi" },
+  { src: "/images/gallery/chilli cheese breads.png", label: "Chilli Cheese Breads" },
+  { src: "/images/gallery/cold beverages.png", label: "Cold Beverages" },
+  { src: "/images/gallery/dum.png", label: "Dum Chai" },
+  { src: "/images/gallery/garlic breads.png", label: "Garlic Breads" },
+  { src: "/images/gallery/infusion water.png", label: "Infusion Water" },
+  { src: "/images/gallery/irani chai.png", label: "Irani Chai" },
+  { src: "/images/gallery/jam breads.png", label: "Jam Breads" },
+  { src: "/images/gallery/jasmine tea.png", label: "Jasmine Tea" },
+  { src: "/images/gallery/kesar badam.png", label: "Kesar Badam" },
+  { src: "/images/gallery/lemon grass tea.png", label: "Lemon Grass Tea" },
+  { src: "/images/gallery/masala peanut.png", label: "Masala Peanut" },
+  { src: "/images/gallery/peppermint 42(2).png", label: "Peppermint" },
+  { src: "/images/gallery/pori kadala poha.png", label: "Pori Kadala Poha" },
+  { src: "/images/gallery/protein channa.png", label: "Protein Channa" },
+  { src: "/images/gallery/samosa small eat.png", label: "Samosa" },
+  { src: "/images/gallery/TMP sundal poha.png", label: "Sundal Poha" },
+  { src: "/images/gallery/tulsi tea.png", label: "Tulsi Tea" },
 ];
+
+const menuCategoryImages = {
+  "Milk Chai's": [
+    "/images/Milk Chai's/bombay chai.png",
+    "/images/Milk Chai's/dum chai.png",
+    "/images/Milk Chai's/elaichi chai.png",
+    "/images/Milk Chai's/ginger chai.png",
+    "/images/Milk Chai's/gulkand chai.png",
+    "/images/Milk Chai's/IRANI CHAI.png",
+    "/images/Milk Chai's/masala chai.png",
+    "/images/Milk Chai's/saffroni chai.png",
+  ],
+  "Black Tea / Chai": [
+    "/images/chai/kattan chai.png",
+    "/images/chai/lemon chai.png",
+    "/images/chai/lemon ginger chai.png",
+  ],
+  Coffee: [
+    "/images/coffee/black coffee.png",
+    "/images/coffee/chocolate coffee.png",
+    "/images/coffee/chukku coffee.png",
+    "/images/coffee/filter coffee.png",
+  ],
+  "Cold Drinks": [
+    "/images/cold drinks/badam cold drink.png",
+    "/images/cold drinks/cold coffee.png",
+    "/images/cold drinks/rose milk.png",
+  ],
+  "Hot Drinks": [
+    "/images/hot drinks/chocolate hot drink.png",
+    "/images/hot drinks/garlic drink.png",
+    "/images/hot drinks/milo hot drink.png",
+  ],
+  "Buns & Pastries": [
+    "/images/bun/butter jam.png",
+    "/images/bun/chesse maska buns.png",
+    "/images/bun/cream buns.png",
+    "/images/bun/nutella buns.png",
+  ],
+  "Savoury Snacks": [
+    "/images/snacks/channa puff.png",
+    "/images/snacks/samosa big.png",
+    "/images/snacks/veg puff.png",
+  ],
+  Maggi: [
+    "/images/maggi/chilli cheese magi.png",
+    "/images/maggi/classic maggi.png",
+  ],
+  "Biscuits & Rusks": [
+    "/images/cookies/butter cookies.png",
+    "/images/cookies/cookies.png",
+    "/images/cookies/Fine rusk.JPG",
+    "/images/cookies/tea cake.png",
+    "/images/cookies/walnut cake.png",
+  ],
+};
 
 const heroShots = [
   "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=420&q=80",
@@ -325,7 +397,7 @@ function Hero() {
           </p>
           <div className="hero-actions">
             <a href="#menu" className="solid-btn">View Menu</a>
-            <a href="https://wa.me/919003019030" target="_blank" rel="noopener noreferrer" className="ghost-btn">WhatsApp Us</a>
+            <a href="https://wa.me/919884630841" target="_blank" rel="noopener noreferrer" className="ghost-btn">WhatsApp Us</a>
           </div>
 
           <div className="hero-shot-row" aria-hidden="true">
@@ -425,6 +497,12 @@ function MenuSection() {
     return textMatch && priceMatch;
   });
 
+  const getMenuImage = (category, index) => {
+    const images = menuCategoryImages[category] || [];
+    if (images.length === 0) return null;
+    return images[index % images.length];
+  };
+
   return (
     <section id="menu" className="section-padding section-alt">
       <div className="container">
@@ -472,8 +550,14 @@ function MenuSection() {
         </div>
 
         <div className="menu-grid">
-          {visibleItems.map((item) => (
-            <article key={item.name} className="menu-card">
+          {visibleItems.map((item, index) => {
+            const bgImage = getMenuImage(activeCategory, index);
+            return (
+            <article
+              key={item.name}
+              className={`menu-card ${bgImage ? "menu-card-image" : ""}`}
+              style={bgImage ? { backgroundImage: `linear-gradient(to top, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.26)), url("${bgImage}")` } : undefined}
+            >
               <div className="menu-card-head">
                 <h3>{item.name}</h3>
                 {item.price ? <span>₹{item.price}</span> : <span className="price-pending">Ask Price</span>}
@@ -491,7 +575,8 @@ function MenuSection() {
                 </a>
               </div>
             </article>
-          ))}
+            );
+          })}
         </div>
 
         {visibleItems.length === 0 && (
@@ -554,7 +639,7 @@ function Contact() {
   const handleSubmit = (event) => {
     event.preventDefault();
     const text = `Hello! I'm ${form.name} (${form.email}). ${form.message}`;
-    window.open(`https://wa.me/919003019030?text=${encodeURIComponent(text)}`, "_blank");
+    window.open(`https://wa.me/919884630841?text=${encodeURIComponent(text)}`, "_blank");
   };
 
   return (
@@ -567,13 +652,13 @@ function Contact() {
 
           <div className="detail-list">
             <div><strong>Address:</strong> 113, PH Road, Purasaiwakkam, Chennai</div>
-            <div><strong>Phone:</strong> 9003019030</div>
+            <div><strong>Phone:</strong> 9884630841</div>
             <div><strong>Email:</strong> swayedovercoffee@gmail.com</div>
             <div><strong>Hours:</strong> Monday – Sunday, 09:00 AM – 05:00 PM</div>
           </div>
 
           <div className="contact-actions">
-            <a href="https://wa.me/919003019030" target="_blank" rel="noopener noreferrer" className="solid-btn">WhatsApp</a>
+            <a href="https://wa.me/919884630841" target="_blank" rel="noopener noreferrer" className="solid-btn">WhatsApp</a>
             <a href="https://www.instagram.com/swayedovercoffee?igsh=ZDVkaXc4czIxamd6" target="_blank" rel="noopener noreferrer" className="ghost-btn">Instagram</a>
           </div>
         </div>
@@ -633,7 +718,7 @@ function Footer() {
 
 function WhatsAppFAB() {
   return (
-    <a href="https://wa.me/919003019030" target="_blank" rel="noopener noreferrer" className="fab" aria-label="Open WhatsApp">
+    <a href="https://wa.me/919884630841" target="_blank" rel="noopener noreferrer" className="fab" aria-label="Open WhatsApp">
       💬
     </a>
   );
@@ -1311,6 +1396,32 @@ export default function App() {
           padding: 1rem;
           box-shadow: var(--shadow);
           transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .menu-card-image {
+          background-size: cover;
+          background-position: center;
+          background-repeat: no-repeat;
+        }
+
+        .menu-card-image h3,
+        .menu-card-image p,
+        .menu-card-image .menu-category-tag {
+          color: #fff;
+        }
+
+        .menu-card-image .menu-category-tag {
+          border-color: rgba(255, 255, 255, 0.34);
+          background: rgba(0, 0, 0, 0.24);
+        }
+
+        .menu-card-image .ghost-btn {
+          color: #fff;
+          border-color: rgba(255, 255, 255, 0.38);
+        }
+
+        .menu-card-image .ghost-btn:hover {
+          background: rgba(255, 255, 255, 0.16);
         }
 
         .menu-card:hover {
