@@ -26,13 +26,13 @@ const menuData = {
     { name: "Cold Badam Milk", price: null, desc: "Chilled, creamy almond goodness with subtle sweetness — perfect cool-down." },
     { name: "Cold Rose Milk", price: null, desc: "Refreshing creamy milk and fragrant rose essence for a floral delight." },
     { name: "Cold Coffee", price: null, desc: "Smooth, chilled brew perfectly blended for a refreshing experience." },
-    { name: "Cold Milo", price: null, desc: "Rich, creamy, chocolaty Milo topped with extra Milo for ultimate indulgence." },
+    // { name: "Cold Milo", price: null, desc: "Rich, creamy, chocolaty Milo topped with extra Milo for ultimate indulgence." },
   ],
   "Hot Drinks": [
     { name: "Poondu Milk Hot", price: null, desc: "Creamy milk and savory garlic for a soothing, healthy and unique warm drink." },
     { name: "Hot Chocolate", price: null, desc: "Velvety chocolate and warm milk — the ultimate cozy treat." },
     { name: "Hot Milo", price: null, desc: "Warm, malty Milo for a comforting and familiar hot beverage." },
-    { name: "Hot Milk", price: null, desc: "Simple, warm, creamy milk that soothes and satisfies with every sip." },
+    // { name: "Hot Milk", price: null, desc: "Simple, warm, creamy milk that soothes and satisfies with every sip." },
   ],
   "Buns & Pastries": [
     { name: "Bun Butter Jam", price: null, desc: "Generously spread with creamy butter and sweet, luscious jam — timeless comfort." },
@@ -49,18 +49,16 @@ const menuData = {
     { name: "Chilli Cheese Maggi", price: null, desc: "Fiery noodles topped with melted cheese — bold, spicy comfort food." },
   ],
   "Biscuits & Rusks": [
-    { name: "Osmania Biscuits (6 nos)", price: null, desc: "Famous crispy-sweet biscuits — the perfect chai companion." },
-    { name: "Peanut Biscuits (6 nos)", price: null, desc: "Crunchy delight packed with rich, nutty flavour." },
+    { name: "Butter Cookies (6 nos)", price: null, desc: "Famous crispy-sweet biscuits — the perfect chai companion." },
     { name: "Chocolate Biscuits (6 nos)", price: null, desc: "Crispy chocolate biscuits — rich chocolatey flavour in every bite." },
-    { name: "Fruit Biscuits (6 nos)", price: null, desc: "Crispy texture with fruity sweetness — packed with bits of real fruit." },
-    { name: "Fine Rusk (6 nos)", price: null, desc: "Golden, light and airy rusk — the ideal companion for chai or coffee." },
+    { name: "Walnut Cake (6 nos)", price: null, desc: "Golden, light and airy rusk — the ideal companion for chai or coffee." },
     { name: "Tea Cake", price: null, desc: "Moist, tender cake with rich buttery flavour — perfect with chai." },
   ],
-  Momos: [
-    { name: "Veg Momo (6 nos)", price: null, desc: "Tender steamed dumplings filled with savory fresh vegetables and aromatic spices." },
-    { name: "Corn Cheese Momo (6 nos)", price: null, desc: "Creamy sweet corn and melted cheese — indulgent steamed dumplings." },
-    { name: "Paneer Momo (6 nos)", price: null, desc: "Delicately steamed dumplings filled with spiced, creamy paneer." },
-  ],
+  // Momos: [
+  //   { name: "Veg Momo (6 nos)", price: null, desc: "Tender steamed dumplings filled with savory fresh vegetables and aromatic spices." },
+  //   { name: "Corn Cheese Momo (6 nos)", price: null, desc: "Creamy sweet corn and melted cheese — indulgent steamed dumplings." },
+  //   { name: "Paneer Momo (6 nos)", price: null, desc: "Delicately steamed dumplings filled with spiced, creamy paneer." },
+  // ],
 };
 
 const galleryImages = [
@@ -90,14 +88,14 @@ const galleryImages = [
 
 const menuCategoryImages = {
   "Milk Chai's": [
-    "/images/Milk Chai's/bombay chai.png",
     "/images/Milk Chai's/dum chai.png",
-    "/images/Milk Chai's/elaichi chai.png",
     "/images/Milk Chai's/ginger chai.png",
-    "/images/Milk Chai's/gulkand chai.png",
-    "/images/Milk Chai's/IRANI CHAI.png",
     "/images/Milk Chai's/masala chai.png",
+    "/images/Milk Chai's/elaichi chai.png",
+    "/images/Milk Chai's/bombay chai.png",
+    "/images/Milk Chai's/gulkand chai.png",
     "/images/Milk Chai's/saffroni chai.png",
+    // "/images/Milk Chai's/IRANI CHAI.png",
   ],
   "Black Tea / Chai": [
     "/images/chai/kattan chai.png",
@@ -105,42 +103,41 @@ const menuCategoryImages = {
     "/images/chai/lemon ginger chai.png",
   ],
   Coffee: [
-    "/images/coffee/black coffee.png",
-    "/images/coffee/chocolate coffee.png",
-    "/images/coffee/chukku coffee.png",
     "/images/coffee/filter coffee.png",
+    "/images/coffee/black coffee.png",
+    "/images/coffee/chukku coffee.png",
+    "/images/coffee/chocolate coffee.png", 
   ],
   "Cold Drinks": [
     "/images/cold drinks/badam cold drink.png",
-    "/images/cold drinks/cold coffee.png",
     "/images/cold drinks/rose milk.png",
+    "/images/cold drinks/cold coffee.png",
   ],
   "Hot Drinks": [
-    "/images/hot drinks/chocolate hot drink.png",
     "/images/hot drinks/garlic drink.png",
+    "/images/hot drinks/chocolate hot drink.png",
     "/images/hot drinks/milo hot drink.png",
   ],
   "Buns & Pastries": [
     "/images/bun/butter jam.png",
-    "/images/bun/chesse maska buns.png",
-    "/images/bun/cream buns.png",
     "/images/bun/nutella buns.png",
+    "/images/bun/chesse maska buns.png",
+    // "/images/bun/cream buns.png",
   ],
   "Savoury Snacks": [
-    "/images/snacks/channa puff.png",
     "/images/snacks/samosa big.png",
     "/images/snacks/veg puff.png",
+    "/images/snacks/channa puff.png",
   ],
   Maggi: [
-    "/images/maggi/chilli cheese magi.png",
     "/images/maggi/classic maggi.png",
+    "/images/maggi/chilli cheese magi.png",
   ],
   "Biscuits & Rusks": [
     "/images/cookies/butter cookies.png",
     "/images/cookies/cookies.png",
-    "/images/cookies/Fine rusk.JPG",
-    "/images/cookies/tea cake.png",
     "/images/cookies/walnut cake.png",
+    "/images/cookies/tea cake.png",
   ],
 };
 
