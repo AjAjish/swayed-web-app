@@ -1,5 +1,116 @@
-import { useEffect, useRef, useState } from "react";
-import * as THREE from "three";
+import { useEffect, useState, useMemo, Suspense, lazy } from "react";
+
+const ThreeCoffeeMotion = lazy(() => import("./ThreeCoffeeMotion").then((module) => ({ default: module.ThreeCoffeeMotion })));
+
+function ThreeLoadingFallback() {
+  return (
+    <div className="three-motion three-loading" aria-hidden="true">
+      <div className="static-coffee-scene" />
+    </div>
+  );
+}
+
+const SunIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="5" />
+    <line x1="12" y1="1" x2="12" y2="3" />
+    <line x1="12" y1="21" x2="12" y2="23" />
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+    <line x1="1" y1="12" x2="3" y2="12" />
+    <line x1="21" y1="12" x2="23" y2="12" />
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+  </svg>
+);
+
+const MoonIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+  </svg>
+);
+
+const MenuIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <line x1="3" y1="12" x2="21" y2="12" />
+    <line x1="3" y1="6" x2="21" y2="6" />
+    <line x1="3" y1="18" x2="21" y2="18" />
+  </svg>
+);
+
+const CloseIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
+
+const SearchIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="11" cy="11" r="8" />
+    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
+);
+
+const WhatsAppIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+  </svg>
+);
+
+const InstagramIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+  </svg>
+);
+
+const MapPinIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+);
+
+const PhoneIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+  </svg>
+);
+
+const MailIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="2" y="4" width="20" height="16" rx="2" />
+    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+  </svg>
+);
+
+const ClockIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12 6 12 12 16 14" />
+  </svg>
+);
+
+const CheckIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
+
+const StarIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+  </svg>
+);
+
+const ArrowRightIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <line x1="5" y1="12" x2="19" y2="12" />
+    <polyline points="12 5 19 12 12 19" />
+  </svg>
+);
 
 const menuData = {
   "Milk Chai's": [
@@ -147,155 +258,6 @@ const heroShots = [
   "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=420&q=80",
 ];
 
-function ThreeCoffeeMotion() {
-  const mountRef = useRef(null);
-
-  useEffect(() => {
-    if (!mountRef.current) return undefined;
-
-    const container = mountRef.current;
-    const scene = new THREE.Scene();
-
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    container.appendChild(renderer.domElement);
-
-    const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
-    camera.position.set(0, 0, 15);
-
-    const ambientLight = new THREE.AmbientLight(0xffe4c8, 0.75);
-    scene.add(ambientLight);
-
-    const warmLight = new THREE.PointLight(0xffb163, 1.1, 36);
-    warmLight.position.set(4, 5, 9);
-    scene.add(warmLight);
-
-    const coolLight = new THREE.PointLight(0xc4d8ff, 0.5, 30);
-    coolLight.position.set(-5, -3, 7);
-    scene.add(coolLight);
-
-    const beanMaterial = new THREE.MeshStandardMaterial({
-      color: 0x6c3c1f,
-      metalness: 0.2,
-      roughness: 0.5,
-    });
-    const beanGeometry = new THREE.SphereGeometry(0.16, 16, 16);
-    const beansGroup = new THREE.Group();
-    const beans = [];
-
-    for (let index = 0; index < 42; index += 1) {
-      const mesh = new THREE.Mesh(beanGeometry, beanMaterial);
-      const radius = 2.1 + Math.random() * 3.8;
-      const angle = Math.random() * Math.PI * 2;
-      const y = (Math.random() - 0.5) * 4.8;
-      mesh.position.set(
-        Math.cos(angle) * radius,
-        y,
-        Math.sin(angle) * radius * 0.55,
-      );
-      mesh.scale.setScalar(0.8 + Math.random() * 0.9);
-      mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
-      mesh.userData = {
-        speed: 0.2 + Math.random() * 0.55,
-        phase: Math.random() * Math.PI * 2,
-      };
-      beans.push(mesh);
-      beansGroup.add(mesh);
-    }
-    scene.add(beansGroup);
-
-    const steamGeometry = new THREE.BufferGeometry();
-    const steamCount = 160;
-    const steamPositions = new Float32Array(steamCount * 3);
-    for (let index = 0; index < steamCount; index += 1) {
-      const i3 = index * 3;
-      steamPositions[i3] = (Math.random() - 0.5) * 7;
-      steamPositions[i3 + 1] = Math.random() * 6 - 2.5;
-      steamPositions[i3 + 2] = (Math.random() - 0.5) * 4;
-    }
-    steamGeometry.setAttribute("position", new THREE.BufferAttribute(steamPositions, 3));
-
-    const steamMaterial = new THREE.PointsMaterial({
-      color: 0xf3d8bc,
-      size: 0.08,
-      transparent: true,
-      opacity: 0.46,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-    });
-
-    const steam = new THREE.Points(steamGeometry, steamMaterial);
-    steam.position.y = -1.8;
-    scene.add(steam);
-
-    const clock = new THREE.Clock();
-    let frameId;
-
-    const onResize = () => {
-      const width = container.clientWidth || 1;
-      const height = container.clientHeight || 1;
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
-      renderer.setSize(width, height, false);
-    };
-
-    onResize();
-    window.addEventListener("resize", onResize);
-
-    const animate = () => {
-      const elapsed = clock.getElapsedTime();
-
-      beansGroup.rotation.y = elapsed * 0.11;
-      beansGroup.rotation.x = Math.sin(elapsed * 0.2) * 0.08;
-
-      beans.forEach((bean, index) => {
-        const { speed, phase } = bean.userData;
-        bean.position.y += Math.sin(elapsed * speed + phase + index * 0.1) * 0.0026;
-        bean.rotation.x += 0.01;
-        bean.rotation.y += 0.006;
-      });
-
-      const positionAttr = steamGeometry.getAttribute("position");
-      for (let index = 0; index < steamCount; index += 1) {
-        const i3 = index * 3;
-        let x = positionAttr.array[i3];
-        let y = positionAttr.array[i3 + 1];
-        x += Math.sin(elapsed * 0.4 + index * 0.13) * 0.0019;
-        y += 0.008 + Math.sin(elapsed + index) * 0.001;
-        if (y > 3.7) {
-          y = -2.5;
-          x = (Math.random() - 0.5) * 7;
-        }
-        positionAttr.array[i3] = x;
-        positionAttr.array[i3 + 1] = y;
-      }
-      positionAttr.needsUpdate = true;
-
-      steam.rotation.y = elapsed * 0.08;
-      renderer.render(scene, camera);
-      frameId = requestAnimationFrame(animate);
-    };
-
-    animate();
-
-    return () => {
-      cancelAnimationFrame(frameId);
-      window.removeEventListener("resize", onResize);
-      if (container.contains(renderer.domElement)) {
-        container.removeChild(renderer.domElement);
-      }
-      beanGeometry.dispose();
-      beanMaterial.dispose();
-      steamGeometry.dispose();
-      steamMaterial.dispose();
-      renderer.dispose();
-    };
-  }, []);
-
-  return <div className="three-motion" ref={mountRef} aria-hidden="true" />;
-}
-
 function Nav({ theme, toggleTheme }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -303,7 +265,7 @@ function Nav({ theme, toggleTheme }) {
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
-    window.addEventListener("scroll", onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
@@ -316,17 +278,17 @@ function Nav({ theme, toggleTheme }) {
   ];
 
   return (
-    <header className={`nav-shell ${scrolled ? "is-scrolled" : ""}`}>
-      <nav className="container nav-row">
-        <a href="#home" className="brand">
-          <img src="/logo.jpeg" alt="Swayed Over Coffee" className="brand-logo" />
+    <header className={`nav-shell ${scrolled ? "is-scrolled" : ""}`} role="banner">
+      <nav className="container nav-row" aria-label="Main navigation">
+        <a href="#home" className="brand" aria-label="Swayed Over Coffee - Home">
+          <img src="/logo.jpeg" alt="" className="brand-logo" aria-hidden="true" />
           <div>
             <div className="brand-title">Swayed Over</div>
             <div className="brand-subtitle">Coffee</div>
           </div>
         </a>
 
-        <div className="nav-links desktop-only">
+        <div className="nav-links desktop-only" role="navigation" aria-label="Primary">
           {links.map(([label, id]) => (
             <a key={id} href={`#${id}`} className="nav-link">
               <span>{label}</span>
@@ -335,26 +297,28 @@ function Nav({ theme, toggleTheme }) {
         </div>
 
         <div className="nav-cta desktop-only">
-          <button type="button" className="theme-btn" onClick={toggleTheme}>
-            {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
+          <button type="button" className="theme-btn" onClick={toggleTheme} aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"} aria-pressed={theme === "dark"}>
+            {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+            <span className="theme-btn-text">{theme === "dark" ? "Light" : "Dark"}</span>
           </button>
-          <a href="https://wa.me/919003019030" target="_blank" rel="noopener noreferrer" className="solid-btn">
-            Order Now
+          <a href="https://wa.me/919003019030" target="_blank" rel="noopener noreferrer" className="solid-btn" aria-label="Order now on WhatsApp">
+            <WhatsAppIcon />
+            <span>Order Now</span>
           </a>
         </div>
 
-        <div className="mobile-actions mobile-only">
-          <button type="button" className="theme-btn mobile-theme-btn" onClick={toggleTheme}>
-            {theme === "dark" ? "☀️" : "🌙"}
+        <div className="mobile-actions mobile-only" role="navigation" aria-label="Mobile actions">
+          <button type="button" className="theme-btn mobile-theme-btn" onClick={toggleTheme} aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"} aria-pressed={theme === "dark"}>
+            {theme === "dark" ? <SunIcon /> : <MoonIcon />}
           </button>
-          <button type="button" className="menu-toggle" onClick={() => setMenuOpen((value) => !value)}>
-            {menuOpen ? "✕" : "☰"}
+          <button type="button" className="menu-toggle" onClick={() => setMenuOpen((value) => !value)} aria-expanded={menuOpen} aria-controls="mobile-menu" aria-label={menuOpen ? "Close menu" : "Open menu"}>
+            {menuOpen ? <CloseIcon /> : <MenuIcon />}
           </button>
         </div>
       </nav>
 
       {menuOpen && (
-        <div className="mobile-menu">
+        <div className="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation menu">
           <div className="container mobile-menu-inner mobile-menu-card">
             {links.map(([label, id]) => (
               <a key={id} className="mobile-link" href={`#${id}`} onClick={() => setMenuOpen(false)}>{label}</a>
@@ -364,8 +328,10 @@ function Nav({ theme, toggleTheme }) {
               target="_blank"
               rel="noopener noreferrer"
               className="solid-btn mobile-order"
+              aria-label="Order now on WhatsApp"
             >
-              Order Now
+              <WhatsAppIcon />
+              <span>Order Now</span>
             </a>
           </div>
         </div>
@@ -376,16 +342,18 @@ function Nav({ theme, toggleTheme }) {
 
 function Hero() {
   return (
-    <section id="home" className="hero section-padding">
-      <div className="hero-backdrop" />
-      <ThreeCoffeeMotion />
-      <div className="hero-orb orb-1" />
-      <div className="hero-orb orb-2" />
-      <div className="hero-orb orb-3" />
+    <section id="home" className="hero section-padding" aria-labelledby="hero-title">
+      <div className="hero-backdrop" aria-hidden="true" />
+      <Suspense fallback={<ThreeLoadingFallback />}>
+        <ThreeCoffeeMotion />
+      </Suspense>
+      <div className="hero-orb orb-1" aria-hidden="true" />
+      <div className="hero-orb orb-2" aria-hidden="true" />
+      <div className="hero-orb orb-3" aria-hidden="true" />
       <div className="container hero-grid">
         <div>
-          <div className="eyebrow">✦ Purasaiwakkam, Chennai</div>
-          <h1>
+          <div className="eyebrow">Purasaiwakkam, Chennai</div>
+          <h1 id="hero-title">
             Breakfast Cafe
             <span>Freshly Brewed</span>
           </h1>
@@ -393,13 +361,19 @@ function Hero() {
             Start your day with freshly brewed coffee, homemade pastries, and a warm cup of milk chai at swayedovercoffee.
           </p>
           <div className="hero-actions">
-            <a href="#menu" className="solid-btn">View Menu</a>
-            <a href="https://wa.me/919884630841" target="_blank" rel="noopener noreferrer" className="ghost-btn">WhatsApp Us</a>
+            <a href="#menu" className="solid-btn">
+              <span>View Menu</span>
+              <ArrowRightIcon />
+            </a>
+            <a href="https://wa.me/919884630841" target="_blank" rel="noopener noreferrer" className="ghost-btn" aria-label="Contact us on WhatsApp">
+              <WhatsAppIcon />
+              <span>WhatsApp Us</span>
+            </a>
           </div>
 
           <div className="hero-shot-row" aria-hidden="true">
             {heroShots.map((src) => (
-              <img key={src} src={src} alt="Coffee moments" />
+              <img key={src} src={src} alt="Coffee moments" loading="lazy" />
             ))}
           </div>
         </div>
@@ -447,11 +421,11 @@ function About() {
   ];
 
   return (
-    <section id="about" className="section-padding">
+    <section id="about" className="section-padding" aria-labelledby="about-title">
       <div className="container about-modern-wrap">
         <div className="about-head">
-          <div className="eyebrow">✦ Our Story</div>
-          <h2>Our Journey Through the Years</h2>
+          <div className="eyebrow">Our Story</div>
+          <h2 id="about-title">Our Journey Through the Years</h2>
           <p>
             A modern story wall that highlights our journey, growth, and philosophy — each chapter presented on curated café imagery.
           </p>
@@ -482,6 +456,7 @@ function MenuSection() {
   const [activeCategory, setActiveCategory] = useState(categories[0]);
   const [search, setSearch] = useState("");
   const [pricedOnly, setPricedOnly] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const currentItems = menuData[activeCategory];
   const visibleItems = currentItems.filter((item) => {
@@ -494,26 +469,59 @@ function MenuSection() {
     return textMatch && priceMatch;
   });
 
+  // Generate search suggestions from item names and descriptions
+  const suggestions = useMemo(() => {
+    if (!search.trim()) return [];
+    const query = search.trim().toLowerCase();
+    const allItems = Object.values(menuData).flat();
+    const matches = allItems
+      .filter((item) =>
+        item.name.toLowerCase().includes(query) || item.desc.toLowerCase().includes(query)
+      )
+      .slice(0, 5)
+      .map((item) => item.name);
+    return [...new Set(matches)];
+  }, [search]);
+
   const getMenuImage = (category, index) => {
     const images = menuCategoryImages[category] || [];
     if (images.length === 0) return null;
     return images[index % images.length];
   };
 
+  const handleSearchChange = (event) => {
+    setSearch(event.target.value);
+    setShowSuggestions(true);
+  };
+
+  const handleSearchBlur = () => {
+    // Delay to allow click on suggestion
+    setTimeout(() => setShowSuggestions(false), 200);
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setSearch(suggestion);
+    setShowSuggestions(false);
+  };
+
   return (
-    <section id="menu" className="section-padding section-alt">
+    <section id="menu" className="section-padding section-alt" aria-labelledby="menu-title">
       <div className="container">
         <div className="centered-head">
-          <div className="eyebrow">✦ Our Menu</div>
-          <h2>Menu & Price List</h2>
+          <div className="eyebrow">Our Menu</div>
+          <h2 id="menu-title">Menu & Price List</h2>
           <p>From aromatic chai to crispy snacks — brewed and baked with love.</p>
         </div>
 
-        <div className="chips-wrap">
+        <div className="chips-wrap" role="tablist" aria-label="Menu categories">
           {categories.map((category) => (
             <button
               key={category}
               type="button"
+              role="tab"
+              aria-selected={activeCategory === category}
+              aria-controls={`menu-panel-${category.replace(/\s+/g, "-").toLowerCase()}`}
+              id={`tab-${category.replace(/\s+/g, "-").toLowerCase()}`}
               className={`chip ${activeCategory === category ? "chip-active" : ""}`}
               onClick={() => setActiveCategory(category)}
             >
@@ -523,15 +531,32 @@ function MenuSection() {
         </div>
 
         <div className="menu-toolbar">
-          <div className="menu-search-wrap">
-            <span className="menu-search-icon">Search</span>
+          <div className="menu-search-wrap" role="search">
+            <label htmlFor="menu-search" className="menu-search-icon visually-hidden">Search menu</label>
+            <SearchIcon aria-hidden="true" />
             <input
+              id="menu-search"
               className="menu-search"
-              type="text"
+              type="search"
               placeholder="Search drinks, snacks, pastries..."
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={handleSearchChange}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={handleSearchBlur}
+              autoComplete="off"
+              aria-autocomplete="list"
+              aria-controls="menu-suggestions"
+              aria-expanded={showSuggestions && suggestions.length > 0}
             />
+            {showSuggestions && suggestions.length > 0 && (
+              <ul id="menu-suggestions" className="search-suggestions" role="listbox">
+                {suggestions.map((suggestion) => (
+                  <li key={suggestion} role="option" onClick={() => handleSuggestionClick(suggestion)}>
+                    {suggestion}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <div className="menu-tools-right">
@@ -539,14 +564,15 @@ function MenuSection() {
               type="button"
               className={`chip menu-filter-toggle ${pricedOnly ? "chip-active" : ""}`}
               onClick={() => setPricedOnly((value) => !value)}
+              aria-pressed={pricedOnly}
             >
               {pricedOnly ? "✔" : "○"} Show only priced
             </button>
-            <div className="menu-count">{visibleItems.length} items</div>
+            <div className="menu-count" aria-live="polite">{visibleItems.length} items</div>
           </div>
         </div>
 
-        <div className="menu-grid">
+        <div className="menu-grid" role="tabpanel" id={`menu-panel-${activeCategory.replace(/\s+/g, "-").toLowerCase()}`} aria-labelledby={`tab-${activeCategory.replace(/\s+/g, "-").toLowerCase()}`}>
           {visibleItems.map((item, index) => {
             const bgImage = getMenuImage(activeCategory, index);
             return (
@@ -567,8 +593,10 @@ function MenuSection() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="ghost-btn menu-mini-btn"
+                  aria-label={`Order ${item.name} on WhatsApp`}
                 >
-                  Order Item
+                  <WhatsAppIcon />
+                  <span>Order</span>
                 </a>
               </div>
             </article>
@@ -592,33 +620,44 @@ function MenuSection() {
 
 function Gallery() {
   const looped = [...galleryImages, ...galleryImages, ...galleryImages];
+  const [paused, setPaused] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const handler = (event) => setPrefersReducedMotion(event.matches);
+    mediaQuery.addEventListener("change", handler);
+    return () => mediaQuery.removeEventListener("change", handler);
+  }, []);
 
   return (
-    <section id="gallery" className="section-padding">
+    <section id="gallery" className="section-padding" aria-labelledby="gallery-title">
       <div className="container">
         <div className="centered-head">
-          <div className="eyebrow">✦ Gallery</div>
-          <h2>Snapshots from swayedovercoffee</h2>
+          <div className="eyebrow">Gallery</div>
+          <h2 id="gallery-title">Snapshots from swayedovercoffee</h2>
           <p>Fresh brews, cozy corners, and comforting food moments.</p>
         </div>
 
-        <div className="gallery-marquee-wrap">
-          <div className="gallery-marquee">
-            <div className="gallery-track">
+        <div className="gallery-marquee-wrap" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocusIn={() => setPaused(true)} onFocusOut={() => setPaused(false)}>
+          <div className="gallery-marquee" role="region" aria-label="Gallery images" aria-roledescription="marquee">
+            <div className="gallery-track" style={{ animationPlayState: paused || prefersReducedMotion ? "paused" : "running" }}>
               {looped.map((image, index) => (
                 <figure key={`row1-${image.src}-${index}`} className="gallery-item gallery-marquee-item">
-                  <img src={image.src} alt={image.label} />
+                  <img src={image.src} alt={image.label} loading="lazy" />
                   <figcaption>{image.label}</figcaption>
                 </figure>
               ))}
             </div>
           </div>
 
-          <div className="gallery-marquee reverse">
-            <div className="gallery-track slower">
+          <div className="gallery-marquee reverse" role="region" aria-label="Gallery images (reverse)" aria-roledescription="marquee">
+            <div className="gallery-track slower" style={{ animationPlayState: paused || prefersReducedMotion ? "paused" : "running" }}>
               {looped.map((image, index) => (
                 <figure key={`row2-${image.src}-${index}`} className="gallery-item gallery-marquee-item">
-                  <img src={image.src} alt={image.label} />
+                  <img src={image.src} alt={image.label} loading="lazy" />
                   <figcaption>{image.label}</figcaption>
                 </figure>
               ))}
@@ -632,71 +671,353 @@ function Gallery() {
 
 function Contact() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [errors, setErrors] = useState({});
+  const [submitStatus, setSubmitStatus] = useState("idle"); // idle, submitting, success, error
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const text = `Hello! I'm ${form.name} (${form.email}). ${form.message}`;
-    window.open(`https://wa.me/919884630841?text=${encodeURIComponent(text)}`, "_blank");
+  const validateForm = () => {
+    const newErrors = {};
+    if (!form.name.trim()) newErrors.name = "Name is required";
+    if (!form.email.trim()) newErrors.email = "Email is required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) newErrors.email = "Please enter a valid email";
+    if (!form.message.trim()) newErrors.message = "Message is required";
+    else if (form.message.trim().length < 10) newErrors.message = "Message must be at least 10 characters";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  return (
-    <section id="contact" className="section-padding section-alt">
-      <div className="container contact-grid">
-        <div className="contact-panel">
-          <div className="eyebrow">✦ Find Us</div>
-          <h2>Come Grab a Cup</h2>
-          <p>Have a question or want to place an order? Message us on WhatsApp anytime.</p>
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!validateForm()) return;
 
-          <div className="detail-list">
-            <div><strong>Address:</strong> 113, PH Road, Purasaiwakkam, Chennai</div>
-            <div><strong>Phone:</strong> 9884630841</div>
-            <div><strong>Email:</strong> swayedovercoffee@gmail.com</div>
-            <div><strong>Hours:</strong> Monday – Sunday, 09:00 AM – 05:00 PM</div>
+    setSubmitStatus("submitting");
+    try {
+      const text = `Hello! I'm ${form.name} (${form.email}). ${form.message}`;
+      window.open(`https://wa.me/919884630841?text=${encodeURIComponent(text)}`, "_blank");
+      setSubmitStatus("success");
+      setForm({ name: "", email: "", message: "" });
+      setTimeout(() => setSubmitStatus("idle"), 5000);
+    } catch {
+      setSubmitStatus("error");
+      setTimeout(() => setSubmitStatus("idle"), 5000);
+    }
+  };
+
+  const contactInfo = [
+    {
+      icon: <MapPinIcon />,
+      label: "Address",
+      value: "113, PH Road, Purasaiwakkam, Chennai, Tamil Nadu 600084",
+      href: "https://maps.google.com/?q=113,+PH+Road,+Purasaiwakkam,+Chennai",
+      external: true,
+    },
+    {
+      icon: <PhoneIcon />,
+      label: "Phone",
+      value: "+91 98846 30841",
+      href: "tel:+919884630841",
+      external: false,
+    },
+    {
+      icon: <MailIcon />,
+      label: "Email",
+      value: "swayedovercoffee@gmail.com",
+      href: "mailto:swayedovercoffee@gmail.com",
+      external: false,
+    },
+    {
+      icon: <ClockIcon />,
+      label: "Hours",
+      value: "Mon – Sun, 9:00 AM – 5:00 PM",
+      href: null,
+      external: false,
+    },
+  ];
+
+  const socialLinks = [
+    {
+      name: "WhatsApp",
+      icon: <WhatsAppIcon />,
+      href: "https://wa.me/919884630841",
+      color: "#25d366",
+      bg: "rgba(37, 211, 102, 0.12)",
+    },
+    {
+      name: "Instagram",
+      icon: <InstagramIcon />,
+      href: "https://www.instagram.com/swayedovercoffee?igsh=ZDVkaXc4czIxamd6",
+      color: "#e4405f",
+      bg: "rgba(228, 64, 95, 0.12)",
+    },
+  ];
+
+  return (
+    <section id="contact" className="section-padding" aria-labelledby="contact-title">
+      <div className="container">
+        <div className="centered-head" style={{ marginBottom: "3rem" }}>
+          <div className="eyebrow">Contact Us</div>
+          <h2 id="contact-title">Let's Start a Conversation</h2>
+          <p style={{ maxWidth: "600px", margin: "0 auto" }}>
+            Have a question, feedback, or want to place a bulk order? We'd love to hear from you.
+            Reach out through any channel below or send us a message directly.
+          </p>
+        </div>
+
+        <div className="contact-layout">
+          {/* Info Panel */}
+          <div className="contact-info-panel">
+            <div className="info-card">
+              <h3>Visit Us</h3>
+              <p className="info-desc">Find us at our cozy corner in Purasaiwakkam. Walk in for a fresh brew or call ahead for takeaway.</p>
+
+              <div className="contact-details">
+                {contactInfo.map((item) => (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    target={item.external ? "_blank" : undefined}
+                    rel={item.external ? "noopener noreferrer" : undefined}
+                    className="contact-detail"
+                    aria-label={item.href ? `${item.label}: ${item.value}` : undefined}
+                  >
+                    <span className="detail-icon" style={{ color: "var(--brand)" }}>{item.icon}</span>
+                    <div className="detail-content">
+                      <span className="detail-label">{item.label}</span>
+                      <span className="detail-value">{item.value}</span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+
+              <div className="social-links">
+                <h4>Follow Our Journey</h4>
+                <div className="social-row">
+                  {socialLinks.map((social) => (
+                    <a
+                      key={social.name}
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="social-btn"
+                      style={{
+                        borderColor: social.color,
+                        background: social.bg,
+                      }}
+                      aria-label={`Follow us on ${social.name}`}
+                    >
+                      <span style={{ color: social.color }}>{social.icon}</span>
+                      <span>{social.name}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Map Placeholder */}
+            <div className="map-placeholder" aria-label="Map showing Swayed Over Coffee location">
+              <div className="map-content">
+                <MapPinIcon style={{ width: "48px", height: "48px", opacity: 0.5, marginBottom: "0.75rem" }} />
+                <p style={{ color: "var(--muted)", margin: 0, fontWeight: 500 }}>113, PH Road, Purasaiwakkam</p>
+                <p style={{ color: "var(--muted)", margin: "0.25rem 0 0", fontSize: "0.875rem" }}>Chennai, Tamil Nadu 600084</p>
+                <a
+                  href="https://maps.google.com/?q=113,+PH+Road,+Purasaiwakkam,+Chennai"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="map-link"
+                  style={{ marginTop: "1rem", display: "inline-flex", alignItems: "center", gap: "0.5rem", color: "var(--brand)", fontWeight: 600, fontSize: "0.875rem" }}
+                >
+                  Open in Google Maps <ArrowRightIcon style={{ width: "16px", height: "16px" }} />
+                </a>
+              </div>
+            </div>
           </div>
 
-          <div className="contact-actions">
-            <a href="https://wa.me/919884630841" target="_blank" rel="noopener noreferrer" className="solid-btn">WhatsApp</a>
-            <a href="https://www.instagram.com/swayedovercoffee?igsh=ZDVkaXc4czIxamd6" target="_blank" rel="noopener noreferrer" className="ghost-btn">Instagram</a>
+          {/* Form Panel */}
+          <div className="contact-form-panel">
+            <form className="form-card" onSubmit={handleSubmit} noValidate>
+              <div className="form-header">
+                <h3>Send Us a Message</h3>
+                <p className="form-subtitle">We typically respond within a few hours during business hours.</p>
+              </div>
+
+              <div className="form-row">
+                <div className="form-field">
+                  <label htmlFor="contact-name" className="form-label">
+                    Your Name <span className="required" aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    id="contact-name"
+                    type="text"
+                    required
+                    value={form.name}
+                    onChange={(event) => {
+                      setForm((current) => ({ ...current, name: event.target.value }));
+                      if (errors.name) setErrors((prev) => ({ ...prev, name: undefined }));
+                    }}
+                    onBlur={() => {
+                      if (!form.name.trim()) setErrors((prev) => ({ ...prev, name: "Name is required" }));
+                    }}
+                    placeholder="e.g. Priya S."
+                    aria-invalid={!!errors.name}
+                    aria-describedby={errors.name ? "name-error" : undefined}
+                    className={errors.name ? "input-error" : ""}
+                  />
+                  {errors.name && (
+                    <p id="name-error" className="form-error" role="alert">
+                      <span aria-hidden="true">⚠</span> {errors.name}
+                    </p>
+                  )}
+                </div>
+
+                <div className="form-field">
+                  <label htmlFor="contact-email" className="form-label">
+                    Email Address <span className="required" aria-hidden="true">*</span>
+                  </label>
+                  <input
+                    id="contact-email"
+                    type="email"
+                    required
+                    value={form.email}
+                    onChange={(event) => {
+                      setForm((current) => ({ ...current, email: event.target.value }));
+                      if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }));
+                    }}
+                    onBlur={() => {
+                      if (!form.email.trim()) setErrors((prev) => ({ ...prev, email: "Email is required" }));
+                      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) setErrors((prev) => ({ ...prev, email: "Please enter a valid email" }));
+                    }}
+                    placeholder="your@email.com"
+                    aria-invalid={!!errors.email}
+                    aria-describedby={errors.email ? "email-error" : undefined}
+                    className={errors.email ? "input-error" : ""}
+                  />
+                  {errors.email && (
+                    <p id="email-error" className="form-error" role="alert">
+                      <span aria-hidden="true">⚠</span> {errors.email}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="contact-message" className="form-label">
+                  Message <span className="required" aria-hidden="true">*</span>
+                </label>
+                <textarea
+                  id="contact-message"
+                  rows={5}
+                  required
+                  value={form.message}
+                  onChange={(event) => {
+                    setForm((current) => ({ ...current, message: event.target.value }));
+                    if (errors.message) setErrors((prev) => ({ ...prev, message: undefined }));
+                  }}
+                  onBlur={() => {
+                    if (!form.message.trim()) setErrors((prev) => ({ ...prev, message: "Message is required" }));
+                    else if (form.message.trim().length < 10) setErrors((prev) => ({ ...prev, message: "Message must be at least 10 characters" }));
+                  }}
+                  placeholder="Tell us what you need... (minimum 10 characters)"
+                  aria-invalid={!!errors.message}
+                  aria-describedby={errors.message ? "message-error" : "message-hint"}
+                  className={errors.message ? "input-error" : ""}
+                />
+                {errors.message ? (
+                  <p id="message-error" className="form-error" role="alert">
+                    <span aria-hidden="true">⚠</span> {errors.message}
+                  </p>
+                ) : (
+                  <p id="message-hint" className="form-hint">
+                    {form.message.length} / 10 minimum characters
+                  </p>
+                )}
+              </div>
+
+              <div className="form-submit">
+                <button
+                  type="submit"
+                  className="solid-btn form-submit-btn"
+                  disabled={submitStatus === "submitting"}
+                  style={{ width: "100%", minHeight: "52px", fontSize: "1rem" }}
+                >
+                  {submitStatus === "submitting" && (
+                    <>
+                      <svg className="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ animation: "spin 1s linear infinite", marginRight: "0.5rem" }}>
+                        <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                        <path d="M12 2a10 10 0 0 1 10 10" strokeOpacity="1" strokeLinecap="round" />
+                      </svg>
+                      Sending...
+                    </>
+                  )}
+                  {submitStatus !== "submitting" && (
+                    <>
+                      <WhatsAppIcon />
+                      <span>Send via WhatsApp</span>
+                    </>
+                  )}
+                </button>
+
+                {submitStatus === "success" && (
+                  <div className="submit-success" role="status" aria-live="polite">
+                    <CheckIcon style={{ color: "var(--brand)" }} />
+                    <span>Message ready! WhatsApp will open with your message.</span>
+                  </div>
+                )}
+
+                {submitStatus === "error" && (
+                  <div className="submit-error" role="alert">
+                    <span style={{ color: "var(--destructive, #dc2626)" }}>⚠</span>
+                    <span>Something went wrong. Please try again or contact us directly.</span>
+                  </div>
+                )}
+              </div>
+            </form>
           </div>
         </div>
 
-        <form className="form-card" onSubmit={handleSubmit}>
-          <h3>Send a Message</h3>
-          <label>
-            Your Name
-            <input
-              type="text"
-              required
-              value={form.name}
-              onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
-              placeholder="e.g. Priya S."
-            />
-          </label>
-
-          <label>
-            Email Address
-            <input
-              type="email"
-              required
-              value={form.email}
-              onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
-              placeholder="your@email.com"
-            />
-          </label>
-
-          <label>
-            Message
-            <textarea
-              rows={4}
-              required
-              value={form.message}
-              onChange={(event) => setForm((current) => ({ ...current, message: event.target.value }))}
-              placeholder="Tell us what you need..."
-            />
-          </label>
-
-          <button type="submit" className="solid-btn">Message on WhatsApp</button>
-        </form>
+        {/* Quick FAQ / Trust Signals */}
+        <div className="contact-trust" style={{ marginTop: "4rem" }}>
+          <h3 style={{ textAlign: "center", marginBottom: "1.5rem", fontSize: "1.25rem" }}>Why reach out to us?</h3>
+          <div className="trust-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.5rem" }}>
+            <div className="trust-item" style={{ textAlign: "center", padding: "1.5rem" }}>
+              <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "color-mix(in srgb, var(--brand) 12%, transparent)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1rem", color: "var(--brand)" }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+              </div>
+              <h4 style={{ margin: "0 0 0.5rem", fontSize: "1rem" }}>Quick Response</h4>
+              <p style={{ color: "var(--muted)", fontSize: "0.875rem", margin: 0 }}>We reply within hours during business hours</p>
+            </div>
+            <div className="trust-item" style={{ textAlign: "center", padding: "1.5rem" }}>
+              <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "color-mix(in srgb, var(--brand) 12%, transparent)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1rem", color: "var(--brand)" }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  <path d="M9 12l2 2 4-4" />
+                </svg>
+              </div>
+              <h4 style={{ margin: "0 0 0.5rem", fontSize: "1rem" }}>Privacy First</h4>
+              <p style={{ color: "var(--muted)", fontSize: "0.875rem", margin: 0 }}>Your data is never shared or sold</p>
+            </div>
+            <div className="trust-item" style={{ textAlign: "center", padding: "1.5rem" }}>
+              <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "color-mix(in srgb, var(--brand) 12%, transparent)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1rem", color: "var(--brand)" }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M17 8h1a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2h1" />
+                  <path d="M11 8V5c0-1.5 1-2 2-2s2 .5 2 2v3" />
+                  <path d="M7 16h10" />
+                  <path d="M9 12v4" />
+                  <path d="M15 12v4" />
+                </svg>
+              </div>
+              <h4 style={{ margin: "0 0 0.5rem", fontSize: "1rem" }}>Coffee Expertise</h4>
+              <p style={{ color: "var(--muted)", fontSize: "0.875rem", margin: 0 }}>Ask us anything about our brews & menu</p>
+            </div>
+            <div className="trust-item" style={{ textAlign: "center", padding: "1.5rem" }}>
+              <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "color-mix(in srgb, var(--brand) 12%, transparent)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1rem", color: "var(--brand)" }}>
+                <StarIcon />
+              </div>
+              <h4 style={{ margin: "0 0 0.5rem", fontSize: "1rem" }}>Loved by Locals</h4>
+              <p style={{ color: "var(--muted)", fontSize: "0.875rem", margin: 0 }}>1000+ happy customers since 2010</p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -704,7 +1025,7 @@ function Contact() {
 
 function Footer() {
   return (
-    <footer className="footer">
+    <footer className="footer" role="contentinfo">
       <div className="container footer-inner">
         <p>© 2026 swayedovercoffee — All Rights Reserved.</p>
         <p>113, PH Road, Purasaiwakkam, Chennai, Tamil Nadu, India</p>
@@ -715,8 +1036,8 @@ function Footer() {
 
 function WhatsAppFAB() {
   return (
-    <a href="https://wa.me/919884630841" target="_blank" rel="noopener noreferrer" className="fab" aria-label="Open WhatsApp">
-      💬
+    <a href="https://wa.me/919884630841" target="_blank" rel="noopener noreferrer" className="fab" aria-label="Chat with us on WhatsApp">
+      <WhatsAppIcon />
     </a>
   );
 }
@@ -748,6 +1069,9 @@ export default function App() {
           --brand-strong: #8b4513;
           --stroke: rgba(181, 101, 29, 0.18);
           --shadow: 0 16px 34px rgba(34, 16, 8, 0.08);
+          --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+          --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+          --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
         }
 
         :root[data-theme='dark'] {
@@ -760,6 +1084,9 @@ export default function App() {
           --brand-strong: #dc8f3a;
           --stroke: rgba(240, 168, 86, 0.24);
           --shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+          --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+          --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+          --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
         }
 
         * { box-sizing: border-box; }
@@ -769,6 +1096,29 @@ export default function App() {
           font-family: 'DM Sans', sans-serif;
           background: var(--bg);
           color: var(--text);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          *,
+          *::before,
+          *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+          }
+          button, a, input, textarea, select, .chip, .menu-card, .gallery-item, .contact-detail, .trust-item, .social-btn, .map-link, .mobile-order, .form-submit-btn {
+            transition: background-color 0.01ms, color 0.01ms, border-color 0.01ms, opacity 0.01ms !important;
+          }
+        }
+
+        :focus-visible {
+          outline: 2px solid var(--brand);
+          outline-offset: 2px;
+        }
+
+        :focus:not(:focus-visible) {
+          outline: none;
         }
 
         #root {
@@ -816,7 +1166,7 @@ export default function App() {
           backdrop-filter: blur(10px);
           background: color-mix(in srgb, var(--bg) 80%, transparent);
           border-bottom: 1px solid var(--stroke);
-          transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+          transition: background 0.25s var(--ease-out), border-color 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
         }
 
         .nav-shell.is-scrolled {
@@ -869,13 +1219,30 @@ export default function App() {
           color: var(--muted);
           font-size: 0.9rem;
           font-weight: 500;
-          transition: color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+          transition: color 0.2s var(--ease-out), background 0.2s var(--ease-out), transform 0.2s var(--ease-out);
+          min-height: 44px;
+          display: flex;
+          align-items: center;
         }
 
         .nav-link:hover {
           color: var(--text);
           background: color-mix(in srgb, var(--brand) 14%, transparent);
           transform: translateY(-1px);
+        }
+
+        @media (max-width: 860px) {
+          .nav-links {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 0.5rem;
+            padding: 1rem;
+          }
+          .nav-link {
+            min-height: 48px;
+            justify-content: center;
+          }
         }
 
         .nav-cta { display: flex; gap: 0.75rem; align-items: center; }
@@ -893,13 +1260,17 @@ export default function App() {
           font-family: inherit;
           cursor: pointer;
           text-decoration: none;
-          transition: 0.22s ease;
+          transition: all 0.22s var(--ease-out);
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
         }
 
         .solid-btn {
           background: linear-gradient(135deg, var(--brand), var(--brand-strong));
           color: #fff;
           box-shadow: var(--shadow);
+          min-height: 44px;
         }
         .solid-btn:hover { transform: translateY(-1px); }
 
@@ -908,11 +1279,22 @@ export default function App() {
           background: transparent;
           border-color: var(--stroke);
           color: var(--text);
+          min-height: 44px;
         }
         .ghost-btn:hover,
         .theme-btn:hover,
         .chip:hover {
           background: color-mix(in srgb, var(--brand) 12%, transparent);
+        }
+
+        .theme-btn-text { display: none; }
+        .desktop-only .theme-btn-text { display: inline; }
+
+        @media (max-width: 860px) {
+          .solid-btn,
+          .ghost-btn {
+            min-height: 48px;
+          }
         }
 
         .desktop-only { display: flex; }
@@ -923,12 +1305,25 @@ export default function App() {
         }
 
         .mobile-theme-btn {
-          width: 42px;
-          height: 42px;
+          width: 48px;
+          height: 48px;
           padding: 0;
           display: grid;
           place-items: center;
-          font-size: 1rem;
+        }
+
+        .menu-toggle {
+          width: 48px;
+          height: 48px;
+          padding: 0;
+          display: grid;
+          place-items: center;
+          background: transparent;
+          border-color: var(--stroke);
+          color: var(--text);
+        }
+        .menu-toggle:hover {
+          background: color-mix(in srgb, var(--brand) 12%, transparent);
         }
 
         .hero {
@@ -971,7 +1366,7 @@ export default function App() {
           filter: blur(20px);
           opacity: 0.45;
           pointer-events: none;
-          animation: orbFloat 12s ease-in-out infinite;
+          animation: orbFloat 12s linear infinite;
           z-index: 0;
         }
 
@@ -1040,7 +1435,7 @@ export default function App() {
           object-fit: cover;
           border: 1px solid var(--stroke);
           box-shadow: var(--shadow);
-          animation: shotFloat 6s ease-in-out infinite;
+          animation: shotFloat 6s linear infinite;
         }
 
         .hero-shot-row img:nth-child(2) {
@@ -1108,7 +1503,7 @@ export default function App() {
           background: color-mix(in srgb, var(--text) 24%, transparent);
           filter: blur(1px);
           opacity: 0;
-          animation: smokeRise 4.8s ease-in infinite;
+          animation: smokeRise 4.8s linear infinite;
         }
 
         .smoke-1 { left: 44%; animation-delay: 0s; }
@@ -1149,22 +1544,22 @@ export default function App() {
           border-radius: 999px;
           background: color-mix(in srgb, var(--brand) 30%, transparent);
           margin-top: 8px;
-          animation: cupFloat 3.6s ease-in-out infinite;
+          animation: cupFloat 3.6s linear infinite;
         }
 
         @keyframes smokeRise {
           0% {
-            transform: translateY(0) translateX(0) scale(0.6);
+            transform: translateY(0) translateX(0) scale(0.9);
             opacity: 0;
           }
-          20% {
-            opacity: 0.38;
+          15% {
+            opacity: 0.4;
           }
           70% {
-            opacity: 0.22;
+            opacity: 0.2;
           }
           100% {
-            transform: translateY(-88px) translateX(18px) scale(1.8);
+            transform: translateY(-88px) translateX(18px) scale(1.2);
             opacity: 0;
           }
         }
@@ -1183,6 +1578,49 @@ export default function App() {
           0%, 100% { transform: translate(0, 0) scale(1); }
           35% { transform: translate(-12px, 12px) scale(1.04); }
           65% { transform: translate(8px, -10px) scale(0.96); }
+        }
+
+        .three-motion-static {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          pointer-events: none;
+          background: radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--brand) 15%, transparent) 0%, transparent 40%),
+                      radial-gradient(circle at 70% 60%, color-mix(in srgb, var(--brand) 10%, transparent) 0%, transparent 35%),
+                      var(--bg);
+        }
+
+        .static-coffee-scene {
+          width: 100%;
+          height: 100%;
+          display: grid;
+          place-items: center;
+        }
+
+        .static-coffee-scene::before {
+          content: "";
+          width: 200px;
+          height: 200px;
+          background: radial-gradient(ellipse at center, color-mix(in srgb, var(--brand) 35%, transparent) 0%, transparent 60%);
+          filter: blur(60px);
+          opacity: 0.4;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .hero-orb,
+          .smoke,
+          .cup-base,
+          .hero-shot-row img,
+          .story-image-card,
+          .gallery-track {
+            animation: none !important;
+          }
+          .hero-orb { opacity: 0.25; }
+          .smoke { opacity: 0; }
+          .cup-base { animation: none; }
+          .hero-shot-row img { transform: none; }
+          .story-image-card { transform: none; }
+          .gallery-track { animation: none; transform: translateX(-50%); }
         }
 
         .contact-grid {
@@ -1218,8 +1656,8 @@ export default function App() {
           background-position: center;
           border: 1px solid var(--stroke);
           box-shadow: var(--shadow);
-          animation: drift 10s ease-in-out infinite;
-          transition: transform 0.24s ease, box-shadow 0.24s ease;
+          animation: drift 10s linear infinite;
+          transition: transform 0.24s var(--ease-out), box-shadow 0.24s var(--ease-out);
         }
 
         .story-image-card:hover {
@@ -1329,12 +1767,24 @@ export default function App() {
           box-shadow: var(--shadow);
         }
 
+        .menu-search-wrap {
+          position: relative;
+        }
+
         .menu-search-icon {
-          font-size: 0.9rem;
-          opacity: 0.8;
+          position: absolute;
+          left: 0.78rem;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: 1rem;
+          opacity: 0.7;
+          pointer-events: none;
+          display: flex;
+          align-items: center;
         }
 
         .menu-search {
+          padding-left: 2.4rem;
           width: 100%;
           border: none;
           background: transparent;
@@ -1368,16 +1818,77 @@ export default function App() {
           background: var(--bg-elevated);
         }
 
+        .search-suggestions {
+          position: absolute;
+          top: calc(100% + 0.5rem);
+          left: 0;
+          right: 0;
+          background: var(--bg-elevated);
+          border: 1px solid var(--stroke);
+          border-radius: 12px;
+          box-shadow: var(--shadow);
+          list-style: none;
+          padding: 0.4rem;
+          margin: 0;
+          z-index: 10;
+          max-height: 200px;
+          overflow-y: auto;
+        }
+
+        .search-suggestions li {
+          padding: 0.6rem 0.8rem;
+          border-radius: 8px;
+          cursor: pointer;
+          color: var(--text);
+          font-size: 0.9rem;
+          transition: background 0.15s var(--ease-out);
+        }
+        .search-suggestions li:hover,
+        .search-suggestions li:focus {
+          background: color-mix(in srgb, var(--brand) 12%, transparent);
+          outline: none;
+        }
+
+        .visually-hidden {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border: 0;
+        }
+
         .chip {
           background: var(--bg-elevated);
           border-color: var(--stroke);
           color: var(--muted);
+          min-height: 44px;
+          display: inline-flex;
+          align-items: center;
         }
 
         .chip-active {
           background: linear-gradient(135deg, var(--brand), var(--brand-strong));
           color: #fff;
           border-color: transparent;
+        }
+
+        @media (max-width: 860px) {
+          .chip {
+            min-height: 48px;
+            padding: 0.75rem 1rem;
+          }
+          .menu-filter-toggle {
+            min-height: 48px;
+          }
+          .menu-count {
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+          }
         }
 
         .menu-grid {
@@ -1392,7 +1903,7 @@ export default function App() {
           border-radius: 16px;
           padding: 1rem;
           box-shadow: var(--shadow);
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
+          transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
         }
 
         .menu-card-image {
@@ -1470,8 +1981,16 @@ export default function App() {
         }
 
         .menu-mini-btn {
-          font-size: 0.78rem;
-          padding: 0.42rem 0.65rem;
+          font-size: 0.8rem;
+          padding: 0.6rem 0.85rem;
+          min-height: 44px;
+        }
+
+        @media (max-width: 860px) {
+          .menu-mini-btn {
+            min-height: 48px;
+            padding: 0.75rem 1rem;
+          }
         }
 
         .menu-empty {
@@ -1546,7 +2065,7 @@ export default function App() {
           height: 220px;
           object-fit: cover;
           display: block;
-          transition: transform 0.35s ease;
+          transition: transform 0.2s var(--ease-out);
         }
 
         .gallery-item:hover img { transform: scale(1.06); }
@@ -1596,9 +2115,10 @@ export default function App() {
           background: var(--bg);
           color: var(--text);
           font: inherit;
-          font-size: 0.92rem;
-          padding: 0.76rem 0.8rem;
+          font-size: 1rem;
+          padding: 1rem 1rem;
           outline: none;
+          min-height: 48px;
         }
 
         .form-card input:focus,
@@ -1648,13 +2168,13 @@ export default function App() {
 
         .mobile-menu-inner {
           display: grid;
-          gap: 0.7rem;
-          padding: 0.9rem 0;
+          gap: 0.5rem;
+          padding: 1rem 0;
         }
 
         .mobile-menu-card {
-          margin: 0.85rem auto 1rem;
-          padding: 0.9rem;
+          margin: 0.5rem auto 1rem;
+          padding: 1rem;
           border-radius: 16px;
           border: 1px solid var(--stroke);
           background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
@@ -1664,11 +2184,15 @@ export default function App() {
         .mobile-link {
           border: 1px solid var(--stroke);
           border-radius: 12px;
-          padding: 0.7rem 0.8rem;
+          padding: 1rem 1.2rem;
           text-decoration: none;
           color: var(--muted);
           font-weight: 500;
-          transition: background 0.2s ease, color 0.2s ease;
+          font-size: 1rem;
+          transition: background 0.2s var(--ease-out), color 0.2s var(--ease-out);
+          min-height: 48px;
+          display: flex;
+          align-items: center;
         }
 
         .mobile-link:hover {
@@ -1677,9 +2201,396 @@ export default function App() {
         }
 
         .mobile-order {
-          margin-top: 0.2rem;
+          margin-top: 0.5rem;
           justify-content: center;
           display: inline-flex;
+          min-height: 52px;
+          padding: 1rem 2rem;
+        }
+
+        /* Enhanced Contact Section Styles */
+        .contact-layout {
+          display: grid;
+          grid-template-columns: 1.2fr 1fr;
+          gap: 2.5rem;
+          align-items: start;
+        }
+
+        .contact-info-panel {
+          display: grid;
+          gap: 1.5rem;
+        }
+
+        .info-card {
+          background: var(--bg-elevated);
+          border: 1px solid var(--stroke);
+          border-radius: 20px;
+          padding: 2rem;
+          box-shadow: var(--shadow);
+        }
+
+        .info-card h3 {
+          margin: 0 0 0.5rem;
+          font-size: 1.35rem;
+          color: var(--text);
+        }
+
+        .info-desc {
+          margin: 0 0 1.5rem;
+          color: var(--muted);
+          line-height: 1.7;
+        }
+
+        .contact-details {
+          display: grid;
+          gap: 0.75rem;
+          margin-bottom: 2rem;
+        }
+
+        .contact-detail {
+          display: flex;
+          align-items: flex-start;
+          gap: 1rem;
+          padding: 1rem;
+          border: 1px solid var(--stroke);
+          border-radius: 14px;
+          text-decoration: none;
+          color: inherit;
+          transition: border-color 0.2s var(--ease-out), background 0.2s var(--ease-out), transform 0.2s var(--ease-out);
+        }
+
+        .contact-detail:hover {
+          border-color: var(--brand);
+          background: color-mix(in srgb, var(--brand) 6%, transparent);
+          transform: translateX(4px);
+        }
+
+        .detail-icon {
+          flex-shrink: 0;
+          margin-top: 0.125rem;
+        }
+
+        .detail-content {
+          display: flex;
+          flex-direction: column;
+          gap: 0.125rem;
+          min-width: 0;
+        }
+
+        .detail-label {
+          font-size: 0.7rem;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          font-weight: 600;
+          color: var(--brand);
+        }
+
+        .detail-value {
+          font-size: 0.9rem;
+          color: var(--text);
+          word-break: break-word;
+        }
+
+        .social-links {
+          padding-top: 1.5rem;
+          border-top: 1px solid var(--stroke);
+        }
+
+        .social-links h4 {
+          margin: 0 0 1rem;
+          font-size: 0.85rem;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          color: var(--muted);
+          font-weight: 600;
+        }
+
+        .social-row {
+          display: flex;
+          gap: 0.75rem;
+          flex-wrap: wrap;
+        }
+
+        .social-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.65rem 1rem;
+          border-radius: 999px;
+          border: 1px solid;
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 0.85rem;
+          color: var(--text);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .social-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .map-placeholder {
+          background: var(--bg-soft);
+          border: 1px solid var(--stroke);
+          border-radius: 20px;
+          min-height: 280px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .map-placeholder::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 36v-4H0v4H0v2h4v4h2v-4h4v-2H6zM6 6V0H0v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+          opacity: 0.5;
+        }
+
+        .map-content {
+          position: relative;
+          z-index: 1;
+          text-align: center;
+          padding: 2rem;
+        }
+
+        .map-link {
+          text-decoration: none;
+          transition: opacity 0.2s ease;
+        }
+
+        .map-link:hover {
+          opacity: 0.8;
+        }
+
+        .contact-form-panel {
+          background: var(--bg-elevated);
+          border: 1px solid var(--stroke);
+          border-radius: 20px;
+          padding: 2rem;
+          box-shadow: var(--shadow);
+          position: sticky;
+          top: 100px;
+        }
+
+        .form-header {
+          margin-bottom: 1.5rem;
+        }
+
+        .form-header h3 {
+          margin: 0 0 0.5rem;
+          font-size: 1.35rem;
+        }
+
+        .form-subtitle {
+          margin: 0;
+          color: var(--muted);
+          font-size: 0.9rem;
+        }
+
+        .form-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+        }
+
+        .form-field {
+          display: grid;
+          gap: 0.4rem;
+        }
+
+        .form-label {
+          font-size: 0.82rem;
+          font-weight: 600;
+          color: var(--muted);
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+        }
+
+        .required {
+          color: var(--brand);
+        }
+
+        .form-field input,
+        .form-field textarea {
+          border: 1px solid var(--stroke);
+          border-radius: 12px;
+          background: var(--bg);
+          color: var(--text);
+          font: inherit;
+          font-size: 1rem;
+          padding: 1rem 1rem;
+          outline: none;
+          min-height: 48px;
+          transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+        }
+
+        .form-field input:hover,
+        .form-field textarea:hover {
+          border-color: color-mix(in srgb, var(--brand) 40%, var(--stroke));
+        }
+
+        .form-field input:focus,
+        .form-field textarea:focus {
+          border-color: var(--brand);
+          box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 20%, transparent);
+        }
+
+        .form-field input.input-error,
+        .form-field textarea.input-error {
+          border-color: var(--destructive, #dc2626);
+        }
+
+        .form-field input.input-error:focus,
+        .form-field textarea.input-error:focus {
+          box-shadow: 0 0 0 3px color-mix(in srgb, var(--destructive, #dc2626) 20%, transparent);
+        }
+
+        .form-error {
+          display: flex;
+          align-items: center;
+          gap: 0.35rem;
+          margin: 0;
+          font-size: 0.8rem;
+          color: var(--destructive, #dc2626);
+        }
+
+        .form-hint {
+          margin: 0;
+          font-size: 0.75rem;
+          color: var(--muted);
+          text-align: right;
+        }
+
+        .form-submit {
+          margin-top: 0.5rem;
+        }
+
+        .submit-success {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          margin-top: 1rem;
+          padding: 0.875rem 1rem;
+          background: color-mix(in srgb, var(--brand) 12%, transparent);
+          border: 1px solid color-mix(in srgb, var(--brand) 30%, transparent);
+          border-radius: 12px;
+          color: var(--brand);
+          font-weight: 500;
+          font-size: 0.9rem;
+          animation: fadeIn 0.3s var(--ease-out);
+        }
+
+        .submit-error {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          margin-top: 1rem;
+          padding: 0.875rem 1rem;
+          background: color-mix(in srgb, var(--destructive, #dc2626) 12%, transparent);
+          border: 1px solid color-mix(in srgb, var(--destructive, #dc2626) 30%, transparent);
+          border-radius: 12px;
+          color: var(--destructive, #dc2626);
+          font-weight: 500;
+          font-size: 0.9rem;
+          animation: fadeIn 0.3s var(--ease-out);
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-4px) scale(0.97); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
+        .spinner {
+          display: inline-block;
+        }
+
+        .contact-trust {
+          padding: 2rem;
+          background: var(--bg-elevated);
+          border: 1px solid var(--stroke);
+          border-radius: 20px;
+          box-shadow: var(--shadow);
+        }
+
+        /* Press feedback — :active states */
+        .nav-link:active,
+        .solid-btn:active,
+        .ghost-btn:active,
+        .theme-btn:active,
+        .menu-toggle:active,
+        .chip:active,
+        .mobile-link:active,
+        .contact-detail:active,
+        .trust-item:active {
+          transform: scale(0.97);
+          transition: transform 160ms var(--ease-out);
+        }
+
+        .menu-card:active {
+          transform: scale(0.99) translateY(-1px);
+          transition: transform 160ms var(--ease-out), box-shadow 160ms var(--ease-out);
+        }
+
+        .gallery-item:active img {
+          transform: scale(1.02);
+          transition: transform 160ms var(--ease-out);
+        }
+
+        .form-field input:active,
+        .form-field textarea:active {
+          transform: scale(0.995);
+          transition: transform 120ms var(--ease-out);
+        }
+
+        .social-btn:active,
+        .map-link:active,
+        .mobile-order:active,
+        .form-submit-btn:active {
+          transform: scale(0.97);
+          transition: transform 160ms var(--ease-out);
+        }
+
+        @media (max-width: 960px) {
+          .contact-layout {
+            grid-template-columns: 1fr;
+          }
+
+          .contact-form-panel {
+            position: static;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .form-row {
+            grid-template-columns: 1fr;
+          }
+
+          .info-card,
+          .contact-form-panel {
+            padding: 1.5rem;
+          }
+
+          .contact-detail {
+            padding: 0.875rem;
+          }
+
+          .social-row {
+            flex-direction: column;
+          }
+
+          .social-btn {
+            justify-content: center;
+          }
         }
 
         @media (max-width: 960px) {
